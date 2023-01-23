@@ -105,18 +105,178 @@ rolling_large1 <- rolling_SDcum(large_caps) |>
 ```
 I then plotted the rolling 3 year annualised standard deviation of the large cap stocks. 
 
-```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large rolling SD \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
+```r 
 finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
-
-```{r Figure2, warning =  FALSE, fig.align = 'center', fig.cap = "Large cap drawdown chart \\label{Figure2}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+A drawdown chart for large cap shares was then attained. 
+```r 
 chart.Drawdown(daily_large$Daily_return,main = "Drawdowns: Large caps in J203", 
                col = "steelblue")
 ```
-
-```{r Figure3, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure3}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+A cumulative returns graph was formulated to ascertain whether the risk is worth the reward. My line of thinking is if large cap shares have a greater volatility of returns then investors need to be rewarded with higher cumulative returns. 
+```r 
 ggplot(daily_large, aes(x = Index, y = Cum_Ret)) + 
     geom_line() +
     theme_bw() +
     labs(title = "Large cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
 ```
+# Mid cap shares
+
+The mid cap share data was acquired from the Alsi dataset. The daily returns were calculated by multiplying the returns column with the J203 column.
+
+```{r Mid cap shares, include=FALSE}
+mid_caps <- Alsi |> 
+    filter(Index_Name == "Mid_Caps")
+mid_caps$Tickers <- gsub(" SJ|Equity","", mid_caps$Tickers)
+mid <- contribution(mid_caps)
+mid1 <- contributionmid(mid_caps)
+daily_mid <- daily_contri(mid)
+#colnames(daily_mid)[1] <- "mid_daily_return"
+rolling_mid <- rolling_contri(mid)
+rolling_mid1 <- rolling_SDcum(mid_caps) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+    labs(title = "Rolling 3 Year Annualized SD of various mid cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    theme(legend.position="none") #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+I then plotted the rolling 3 year annualised standard deviation of the mid cap stocks. 
+```r 
+finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+A drawdown chart for mid cap shares was then attained. 
+```r
+chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
+               col = "steelblue")
+```
+A cumulative returns graph was formulated to ascertain whether the risk is worth the reward. My line of thinking was the same as in the large cap share example. 
+```r 
+ggplot(daily_mid, aes(x = Index, y = Cum_Ret)) + 
+    geom_line() +
+    theme_bw() +
+    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+# Small cap shares
+
+The small cap share data was acquired from the Alsi dataset. The daily returns were calculated by multiplying the returns column with the J203 column.
+
+```{r Small cap shares, include=FALSE}
+small_caps <- Alsi |> 
+    filter(Index_Name == "Small_Caps")
+small_caps$Tickers <- gsub(" SJ|Equity","", small_caps$Tickers)
+small <- contribution(small_caps)
+small1 <- contributionsmall(small_caps)
+daily_small <- daily_contri(small)
+#colnames(daily_small)[1] <- "small_daily_return"
+rolling_small <- rolling_contri(small)
+roll <- rolling_SDcum(small_caps)
+rolling_small1 <- rolling_SDcum(small_caps) |> 
+    filter(RollSD < 0.4) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+    labs(title = "Rolling 3 Year Annualized SD of various small cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    theme(legend.position="none") #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+I then plotted the rolling 3 year annualised standard deviation of the small cap stocks. 
+
+```r
+finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+A drawdown chart for mid cap shares was then attained. 
+```r
+chart.Drawdown(daily_small$Daily_return,main = "Drawdowns: Small caps in J203", 
+               col = "steelblue")
+```
+A cumulative returns graph was formulated to ascertain whether the risk is worth the reward. My line of thinking was the same as in the large cap share example. 
+```r
+ggplot(daily_small, aes(x = Index, y = Cum_Ret)) + 
+    geom_line() +
+    theme_bw() +
+    labs(title = "Small cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+
+# Rolling Standard deviation
+
+The datasets had to be manipulated so that they could be joined and later analysed. The "join" dataframe merged the large, mid and small cap data frames so that the rolling standard deviation of their daily return contribution to the J203 could be compared. 
+```{r Join, include=FALSE}
+ljoin <- large
+colnames(ljoin)[2] <- "large_dailyreturn"
+mjoin <- mid
+colnames(mjoin)[2] <- "mid_dailyreturn"
+sjoin <- small
+colnames(sjoin)[2] <- "small_dailyreturn"
+join <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    gather(Index, Return, -date) |> 
+    mutate(YM = format(date, "%Y%B")) |> 
+    arrange(date) |> 
+    group_by(Index, YM) |> 
+    filter(date == last(date)) |> 
+    group_by(Index) |> 
+    select(date, Index, Return) |> 
+    mutate(RollSD = RcppRoll::roll_sd(1 + Return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+    filter(!is.na(RollSD)) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Index), alpha = 0.7, size = 1.25) +
+    labs(title = "Illustration of Rolling 3 Year Annualized SD of various Indices with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+It is evident that small cap stock returns have the lowest rolling standard deviation, followed by mid cap stocks. 
+```r
+finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+Static standard deviation for each of the stock sizes was deemed necessary and thus calculated. It is again evident that large cap stocks embody a higher standard deviation than mid and small cap stocks. 
+
+```{r STD, include=FALSE}
+largevol <- StdDev(large$large_daily_return)
+midvol <- StdDev(mid$mid_daily_return)
+smallvol <- StdDev(small$small_daily_return)
+
+cat("Large volatility: ", largevol, "\n")
+cat("Mid volatility: ", midvol, "\n")
+cat("Small volatility: ", smallvol)
+```
+The results were then put into a table. 
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+         & Standard deviation \\
+        \hline
+        Large cap & 0.01118614 \\
+        Mid cap & 0.001418264 \\
+        Small cap & 0.0002078111 \\
+        \hline
+    \end{tabular}
+    \caption{Standard deviation}
+    \label{tab:SD}
+\end{center}
+\end{table}
+
+Volatility also needed to be analysed. This analysis was conducted with the help of the performance analytics package. 
+```{r vol,include=FALSE}
+vol_returns <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    tbl_xts()
+VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
+```
+Again, a table was created to display the results. 
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c | c | c |}
+    \hline
+         & Large cap & Mid cap & Small cap \\
+        \hline
+        Volatility skewness & 1.067183 & 0.9504131 & 0.9286573 \\
+        \hline
+    \end{tabular}
+    \caption{Volatility skewness}
+    \label{tab:VS}
+\end{center}
+\end{table}
