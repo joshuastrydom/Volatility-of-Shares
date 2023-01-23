@@ -320,7 +320,7 @@ ggplot(daily_small, aes(x = Index, y = Cum_Ret)) +
     labs(title = "Small cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
 ```
 
-# Rolling Standard deviation
+# Rolling Standard deviation  \label{Standard deviation}
 
 ```{r Join, include=FALSE}
 ljoin <- large
@@ -343,7 +343,7 @@ join <- list(ljoin, mjoin, sjoin) |>
     ggplot() +
     geom_line(aes(x = date, y = RollSD, color = Index), alpha = 0.7, size = 1.25) +
     labs(title = "Illustration of Rolling 3 Year Annualized SD of various Indices with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-    theme_fmx(title.size = ggpts(30), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
     #theme(text=element_text(family="Garamond", size=14))
 ```
 
@@ -430,7 +430,7 @@ The upside/downside ratio is often used to gauge overbought and oversold conditi
 
 <!-- hfill can be used to create a space, like here between text and table. -->
 
-# Conclusion
+# Conclusion \label{Conclusion}
 
 I hope you find this template useful. Remember, stackoverflow is your friend - use it to find answers to questions. Feel free to write me a mail if you have any questions regarding the use of this package. To cite this package, simply type citation("Texevier") in Rstudio to get the citation for @Texevier (Note that uncited references in your bibtex file will not be included in References).
 
