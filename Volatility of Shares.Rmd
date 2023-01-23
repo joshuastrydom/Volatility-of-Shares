@@ -1,0 +1,456 @@
+---
+# IMPORTANT: Change settings here, but DO NOT change the spacing.
+# Remove comments and add values where applicable.
+# The descriptions below should be self-explanatory
+
+title: "Helping You Write Academic Papers in R using Texevier"
+#subtitle: "This will appear as Right Header"
+
+documentclass: "elsarticle"
+
+# --------- Thesis title (Optional - set to FALSE by default).
+# You can move the details below around as you please.
+Thesis_FP: FALSE
+# Entry1: "An unbelievable study with a title spanning multiple lines."
+# Entry2: "\\textbf{Nico Katzke}" # textbf for bold
+# Entry3: "A thesis submitted toward the degree of Doctor of Philosophy"
+# Uni_Logo: Tex/Logo.png # Place a logo in the indicated location (from your root, e.g. defaults to ~/Tex/Logo.png) and uncomment this line. Leave uncommented for no image
+# Logo_width: 0.3 # If using a logo - use this to set width (size) of image
+# Entry4: "Under the supervision of: \\vfill Prof. Joe Smith and Dr. Frank Smith"
+# Entry5: "Stellenbosch University"
+# Entry6: April 2020
+# Entry7:
+# Entry8:
+
+# --------- Front Page
+# Comment: ----- Follow this pattern for up to 5 authors
+AddTitle: TRUE # Use FALSE when submitting to peer reviewed platform. This will remove author names.
+Author1: "Nico Katzke^[__Contributions:__  \\newline _The authors would like to thank no institution for money donated to this project. Thank you sincerely._]"  # First Author - note the thanks message displayed as an italic footnote of first page.
+Ref1: "Prescient Securities, Cape Town, South Africa" # First Author's Affiliation
+Email1: "nfkatzke\\@gmail.com" # First Author's Email address
+
+Author2: "John Smith"
+Ref2: "Some other Institution, Cape Town, South Africa"
+Email2: "John\\@gmail.com"
+CommonAffiliation_12: TRUE # If Author 1 and 2 have a common affiliation. Works with _13, _23, etc.
+
+Author3: "John Doe"
+Email3: "Joe\\@gmail.com"
+
+CorrespAuthor_1: TRUE  # If corresponding author is author 3, e.g., use CorrespAuthor_3: TRUE
+
+# Comment out below to remove both. JEL Codes only given if keywords also given.
+keywords: "Multivariate GARCH \\sep Kalman Filter \\sep Copula" # Use \\sep to separate
+JELCodes: "L250 \\sep L100"
+
+# ----- Manage headers and footers:
+#BottomLFooter: $Title$
+#BottomCFooter:
+#TopLHeader: \leftmark # Adds section name at topleft. Remove comment to add it.
+BottomRFooter: "\\footnotesize Page \\thepage" # Add a '#' before this line to remove footer.
+addtoprule: TRUE
+addfootrule: TRUE               # Use if footers added. Add '#' to remove line.
+
+# --------- page margins:
+margin: 2.3 # Sides
+bottom: 2 # bottom
+top: 2.5 # Top
+HardSet_layout: TRUE # Hard-set the spacing of words in your document. This will stop LaTeX squashing text to fit on pages, e.g.
+# This is done by hard-setting the spacing dimensions. Set to FALSE if you want LaTeX to optimize this for your paper.
+
+# --------- Line numbers
+linenumbers: FALSE # Used when submitting to journal
+
+# ---------- References settings:
+# You can download cls format here: https://www.zotero.org/ - simply search for your institution. You can also edit and save cls formats here: https://editor.citationstyles.org/about/
+# Hit download, store it in Tex/ folder, and change reference below - easy.
+bibliography: Tex/ref.bib       # Do not edit: Keep this naming convention and location.
+csl: Tex/harvard-stellenbosch-university.csl # referencing format used.
+# By default, the bibliography only displays the cited references. If you want to change this, you can comment out one of the following:
+#nocite: '@*' # Add all items in bibliography, whether cited or not
+# nocite: |  # add specific references that aren't cited
+#  @grinold2000
+#  @Someoneelse2010
+
+# ---------- General:
+RemovePreprintSubmittedTo: TRUE  # Removes the 'preprint submitted to...' at bottom of titlepage
+Journal: "Journal of Finance"   # Journal that the paper will be submitting to, if RemovePreprintSubmittedTo is set to TRUE.
+toc: FALSE                       # Add a table of contents
+numbersections: TRUE             # Should sections (and thus figures and tables) be numbered?
+fontsize: 11pt                  # Set fontsize
+linestretch: 1.2                # Set distance between lines.
+link-citations: TRUE            # This creates dynamic links to the papers in reference list.
+
+### Adding additional latex packages:
+# header-includes:
+#    - \usepackage{colortbl} # Add additional packages here.
+
+output:
+  pdf_document:
+    keep_tex: TRUE
+    template: Tex/TexDefault.txt
+    fig_width: 3.5 # Adjust default figure sizes. This can also be done in the chunks of the text.
+    fig_height: 3.5
+abstract: |
+  Abstract to be written here. The abstract should not be too long and should provide the reader with a good understanding what you are writing about. Academic papers are not like novels where you keep the reader in suspense. To be effective in getting others to read your paper, be as open and concise about your findings here as possible. Ideally, upon reading your abstract, the reader should feel he / she must read your paper in entirety.
+---
+
+<!-- First: Set your default preferences for chunk options: -->
+
+<!-- If you want a chunk's code to be printed, set echo = TRUE. message = FALSE stops R printing ugly package loading details in your final paper too. I also suggest setting warning = FALSE and checking for warnings in R, else you might find ugly warnings in your paper. -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 5, fig.pos="H", fig.pos = 'H')
+# Note: Include = FALSE implies the code is executed, but not printed in your pdf.
+# warning and message = FALSE implies ugly messages and warnings are removed from your pdf.
+# These should be picked up when you execute the command chunks (code sections below) in your rmd, not printed in your paper!
+
+# Lets load in example data, and see how this can be stored and later called from your 'data' folder.
+if(!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+if(!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+library(quantmod)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(fmxdat)
+library(data.table)
+library(tbl2xts)
+library(tidyr)
+library(PerformanceAnalytics)
+library(rvest)
+```
+
+```{r Load data, include=FALSE}
+Alsi <- readRDS("data/Alsi_Returns.rds")
+Alsi <- as.data.frame(Alsi)
+```
+
+```{r Load functions, include=FALSE}
+#Create functions that create the data frames for each size
+contribution <- function(x) {
+  index1 <- x[,c(1:3,7)] |> 
+      mutate(Contribution = Return * J203) #All share index
+  index1[is.na(index1)] = 0
+  wide_index1 <- spread(index1[,c(1:2,5)], Tickers, Contribution)
+  wide_index1[is.na(wide_index1)] = 0
+  daily_contribution <- wide_index1 |> 
+      mutate(Daily_return = select(wide_index1, 2:ncol(wide_index1)) |> rowSums(na.rm = TRUE)) #Sum of daily returns of each stock for index
+  first <- daily_contribution[,1]
+  last <- daily_contribution[,ncol(daily_contribution)]
+  Total <- data.frame(first,last)
+  colnames(Total)[1] <- "date"
+  colnames(Total)[2] <- "Daily_return"
+  return(Total)
+} #Use output for rolling and daily functions
+
+contributionmid <- function(x) {
+  index1 <- x[,c(1:3,9)] |> 
+      mutate(Contribution = Return * J201) #Mid cap index
+  index1[is.na(index1)] = 0
+  wide_index1 <- spread(index1[,c(1:2,5)], Tickers, Contribution)
+  wide_index1[is.na(wide_index1)] = 0
+  daily_contribution <- wide_index1 |> 
+      mutate(J201Daily_return = select(wide_index1, 2:ncol(wide_index1)) |> rowSums(na.rm = TRUE)) #Sum of daily returns of each stock for index
+  Total <- daily_contribution[,c(1,177)]
+  return(Total)
+} #Use output for rolling and daily functions
+
+contributionsmall <- function(x) {
+  index1 <- x[,c(1:3,10)] |> 
+      mutate(Contribution = Return * J202) #Small cap index
+  index1[is.na(index1)] = 0
+  wide_index1 <- spread(index1[,c(1:2,5)], Tickers, Contribution)
+  wide_index1[is.na(wide_index1)] = 0
+  daily_contribution <- wide_index1 |> 
+      mutate(J202Daily_return = select(wide_index1, 2:ncol(wide_index1)) |> rowSums(na.rm = TRUE)) #Sum of daily returns of each stock for index
+  Total <- daily_contribution[,c(1,225)]
+  return(Total)
+}
+#Use output for rolling and daily functions
+
+daily_contri <- function(x){
+    daily <- x |> 
+        mutate(Cum_Ret = cumprod(1 + Daily_return))
+    xts <- tbl_xts(daily)
+    return(xts)
+}
+
+rolling_contri <- function(x){
+    rolling <- x |> 
+        gather(Ticker, Contribution, -date) |> 
+        group_by(Ticker)
+    xts <- tbl_xts(tblData = rolling, cols_to_xts = Contribution, spread_by = Ticker)
+    return(xts)
+}
+
+rolling_SDcum <- function(x){
+    rolling <- x |> #Use large_caps, mid_caps or small_caps
+        mutate(YM = format(date, "%Y%B")) |> 
+        arrange(date) |> 
+        group_by(Tickers, YM) |> 
+        filter(date == last(date)) |> 
+        group_by(Tickers) |> 
+        select(date, Tickers, Return) |> 
+        mutate(RollSD = RcppRoll::roll_sd(1 + Return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(RollSD))
+    return(rolling)
+}
+```
+
+<!-- ############################## -->
+<!-- # Start Writing here: -->
+<!-- ############################## -->
+
+# Introduction \label{Introduction}
+
+In general, small cap stocks tend to have higher volatility than large cap stocks, and mid cap stocks tend to fall in between the two in terms of volatility. This is because small cap companies typically have less established business models and less predictable revenue streams, which can lead to greater fluctuations in their stock prices. On the other hand, large cap companies tend to have more established business models and more predictable revenue streams, which can lead to less volatility in their stock prices.
+
+In R, one can use the package 'PerformanceAnalytics' to calculate the volatility of different indexes. The 'volatility' function in this package can be used to calculate the standard deviation of returns over a certain period of time, which is a commonly used measure of volatility. You can then compare the volatility of the large cap, mid cap and small cap indexes by passing the data of each index to the function and comparing the results.
+
+@fama1997[p. 33] and @grinold2000 
+
+# Large cap shares \label{Large}
+
+<!-- The following is a code chunk. It must have its own unique name (after the r), or no name. After the comma follows commands for R which are self-explanatory. By default, the code and messages will not be printed in your pdf, just the output: -->
+
+```{r Large cap shares, include=FALSE}
+large_caps <- Alsi |> 
+    filter(Index_Name == "Large_Caps")
+large_caps$Tickers <- gsub(" SJ|Equity","", large_caps$Tickers)
+large <- contribution(large_caps)
+daily_large <- daily_contri(large)
+#colnames(daily_large)[1] <- "large_daily_return"
+rolling_large <- rolling_contri(large)
+rolling_large1 <- rolling_SDcum(large_caps) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+    labs(title = "Rolling 3 Year Annualized SD of various large cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    theme(legend.position="none") #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+
+```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large rolling SD \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
+finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+
+```{r Figure2, warning =  FALSE, fig.align = 'center', fig.cap = "Large cap drawdown chart \\label{Figure2}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+chart.Drawdown(daily_large$Daily_return,main = "Drawdowns: Large caps in J203", 
+               col = "steelblue")
+```
+
+```{r Figure3, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure3}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+ggplot(daily_large, aes(x = Index, y = Cum_Ret)) + 
+    geom_line() +
+    theme_bw() +
+    labs(title = "Large cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+
+# Mid cap shares \label{Mid}
+
+```{r Mid cap shares, include=FALSE}
+mid_caps <- Alsi |> 
+    filter(Index_Name == "Mid_Caps")
+mid_caps$Tickers <- gsub(" SJ|Equity","", mid_caps$Tickers)
+mid <- contribution(mid_caps)
+mid1 <- contributionmid(mid_caps)
+daily_mid <- daily_contri(mid)
+#colnames(daily_mid)[1] <- "mid_daily_return"
+rolling_mid <- rolling_contri(mid)
+rolling_mid1 <- rolling_SDcum(mid_caps) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+    labs(title = "Rolling 3 Year Annualized SD of various mid cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    theme(legend.position="none") #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+
+```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+
+```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure5}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
+               col = "steelblue")
+```
+
+```{r Figure6, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure6}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+ggplot(daily_mid, aes(x = Index, y = Cum_Ret)) + 
+    geom_line() +
+    theme_bw() +
+    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+
+# Small cap shares \label{Small}
+
+```{r Small cap shares, include=FALSE}
+small_caps <- Alsi |> 
+    filter(Index_Name == "Small_Caps")
+small_caps$Tickers <- gsub(" SJ|Equity","", small_caps$Tickers)
+small <- contribution(small_caps)
+small1 <- contributionsmall(small_caps)
+daily_small <- daily_contri(small)
+#colnames(daily_small)[1] <- "small_daily_return"
+rolling_small <- rolling_contri(small)
+roll <- rolling_SDcum(small_caps)
+rolling_small1 <- rolling_SDcum(small_caps) |> 
+    filter(RollSD < 0.4) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+    labs(title = "Rolling 3 Year Annualized SD of various small cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    theme(legend.position="none") #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+
+```{r Figure7, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure7}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+
+```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure8}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+chart.Drawdown(daily_small$Daily_return,main = "Drawdowns: Small caps in J203", 
+               col = "steelblue")
+```
+
+```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure9}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+ggplot(daily_small, aes(x = Index, y = Cum_Ret)) + 
+    geom_line() +
+    theme_bw() +
+    labs(title = "Small cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+
+# Rolling Standard deviation
+
+```{r Join, include=FALSE}
+ljoin <- large
+colnames(ljoin)[2] <- "large_dailyreturn"
+mjoin <- mid
+colnames(mjoin)[2] <- "mid_dailyreturn"
+sjoin <- small
+colnames(sjoin)[2] <- "small_dailyreturn"
+join <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    gather(Index, Return, -date) |> 
+    mutate(YM = format(date, "%Y%B")) |> 
+    arrange(date) |> 
+    group_by(Index, YM) |> 
+    filter(date == last(date)) |> 
+    group_by(Index) |> 
+    select(date, Index, Return) |> 
+    mutate(RollSD = RcppRoll::roll_sd(1 + Return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+    filter(!is.na(RollSD)) |> 
+    ggplot() +
+    geom_line(aes(x = date, y = RollSD, color = Index), alpha = 0.7, size = 1.25) +
+    labs(title = "Illustration of Rolling 3 Year Annualized SD of various Indices with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+    theme_fmx(title.size = ggpts(30), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
+    #theme(text=element_text(family="Garamond", size=14))
+```
+
+```{r Figure10, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure10}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```
+
+```{r STD, include=FALSE}
+#largevol <- StdDev(large$large_daily_return)
+#midvol <- StdDev(mid$mid_daily_return)
+#smallvol <- StdDev(small$small_daily_return)
+
+#cat("Large volatility: ", largevol, "\n")
+#cat("Mid volatility: ", midvol, "\n")
+#cat("Small volatility: ", smallvol)
+```
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+         & Standard deviation \\
+        \hline
+        Large cap & 0.01118614 \\
+        Mid cap & 0.001418264 \\
+        Small cap & 0.0002078111 \\
+        \hline
+    \end{tabular}
+    \caption{Standard deviation}
+    \label{tab:SD}
+\end{center}
+\end{table}
+
+Figures \ref{Figure1}  and \ref{Figure2}
+
+
+<!-- :::::: {.columns data-latex="[T]"} -->
+<!-- ::: {.column data-latex="{0.7\textwidth}"} -->
+<!-- ```{r, echo=FALSE, fig.width=4, fig.height=4} -->
+<!-- par(mar = c(4, 4, .2, .1)) -->
+<!-- plot(cars, pch = 19) -->
+<!-- ``` -->
+<!-- ::: -->
+<!-- ::: {.column data-latex="{0.05\textwidth}"} -->
+<!-- \ -->
+<!-- ::: -->
+<!-- ::: {.column data-latex="{0.2\textwidth}"} -->
+<!-- \scriptsize -->
+
+<!-- ## Data {-} -->
+<!-- The figure on the left-hand side shows the `cars` data. -->
+
+<!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do -->
+<!-- eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut -->
+<!-- enim ad minim veniam, quis nostrud exercitation ullamco laboris -->
+<!-- nisi ut aliquip ex ea commodo consequat. -->
+<!-- ::: -->
+<!-- :::::: -->
+
+```{r vol,include=FALSE}
+#vol_returns <- list(ljoin, mjoin, sjoin) |>
+#    reduce(full_join, by='date') |> 
+#    tbl_xts()
+#VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
+```
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c | c | c |}
+    \hline
+         & Large cap & Mid cap & Small cap \\
+        \hline
+        Volatility skewness & 1.067183 & 0.9504131 & 0.9286573 \\
+        \hline
+    \end{tabular}
+    \caption{Volatility skewness}
+    \label{tab:VS}
+\end{center}
+\end{table}
+
+The upside/downside ratio is often used to gauge overbought and oversold conditions in the market. Low values can indicate that the market is reaching oversold levels, while high values can indicate that the market is becoming overbought.
+
+\hfill
+
+<!-- hfill can be used to create a space, like here between text and table. -->
+
+# Conclusion
+
+I hope you find this template useful. Remember, stackoverflow is your friend - use it to find answers to questions. Feel free to write me a mail if you have any questions regarding the use of this package. To cite this package, simply type citation("Texevier") in Rstudio to get the citation for @Texevier (Note that uncited references in your bibtex file will not be included in References).
+
+<!-- Make title of bibliography here: -->
+<!-- \newpage -->
+
+\newpage
+
+# References {-}
+
+<div id="refs"></div>
+
+
+# Appendix {-}
+
+## Appendix A {-}
+
+Some appendix information here
+
+## Appendix B {-}
+
