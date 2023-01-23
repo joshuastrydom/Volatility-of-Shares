@@ -1,0 +1,488 @@
+\documentclass[11pt,preprint, authoryear]{elsarticle}
+
+\usepackage{lmodern}
+%%%% My spacing
+\usepackage{setspace}
+\setstretch{1.2}
+\DeclareMathSizes{12}{14}{10}{10}
+
+% Wrap around which gives all figures included the [H] command, or places it "here". This can be tedious to code in Rmarkdown.
+\usepackage{float}
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[H]
+} {
+    \endorigfigure
+}
+
+\let\origtable\table
+\let\endorigtable\endtable
+\renewenvironment{table}[1][2] {
+    \expandafter\origtable\expandafter[H]
+} {
+    \endorigtable
+}
+
+
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+
+\usepackage{amssymb, amsmath, amsthm, amsfonts}
+
+\def\bibsection{\section*{References}} %%% Make "References" appear before bibliography
+
+
+\usepackage[round]{natbib}
+
+\usepackage{longtable}
+\usepackage[margin=2.3cm,bottom=2cm,top=2.5cm, includefoot]{geometry}
+\usepackage{fancyhdr}
+\usepackage[bottom, hang, flushmargin]{footmisc}
+\usepackage{graphicx}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1.3ex plus 0.5ex minus 0.3ex}
+\usepackage{textcomp}
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\usepackage{array}
+\newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}p{#1}}
+
+%%%%  Remove the "preprint submitted to" part. Don't worry about this either, it just looks better without it:
+\makeatletter
+\def\ps@pprintTitle{%
+  \let\@oddhead\@empty
+  \let\@evenhead\@empty
+  \let\@oddfoot\@empty
+  \let\@evenfoot\@oddfoot
+}
+\makeatother
+
+ \def\tightlist{} % This allows for subbullets!
+
+\usepackage{hyperref}
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=blue,
+            pdfborder={0 0 0}}
+
+
+% The following packages allow huxtable to work:
+\usepackage{siunitx}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{calc}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{caption}
+
+
+\newenvironment{columns}[1][]{}{}
+
+\newenvironment{column}[1]{\begin{minipage}{#1}\ignorespaces}{%
+\end{minipage}
+\ifhmode\unskip\fi
+\aftergroup\useignorespacesandallpars}
+
+\def\useignorespacesandallpars#1\ignorespaces\fi{%
+#1\fi\ignorespacesandallpars}
+
+\makeatletter
+\def\ignorespacesandallpars{%
+  \@ifnextchar\par
+    {\expandafter\ignorespacesandallpars\@gobble}%
+    {}%
+}
+\makeatother
+
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newenvironment{CSLReferences}%
+  {\setlength{\parindent}{0pt}%
+  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces}%
+  {\par}
+
+
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+%%% Include extra packages specified by user
+
+%%% Hard setting column skips for reports - this ensures greater consistency and control over the length settings in the document.
+%% page layout
+%% paragraphs
+\setlength{\baselineskip}{12pt plus 0pt minus 0pt}
+\setlength{\parskip}{12pt plus 0pt minus 0pt}
+\setlength{\parindent}{0pt plus 0pt minus 0pt}
+%% floats
+\setlength{\floatsep}{12pt plus 0 pt minus 0pt}
+\setlength{\textfloatsep}{20pt plus 0pt minus 0pt}
+\setlength{\intextsep}{14pt plus 0pt minus 0pt}
+\setlength{\dbltextfloatsep}{20pt plus 0pt minus 0pt}
+\setlength{\dblfloatsep}{14pt plus 0pt minus 0pt}
+%% maths
+\setlength{\abovedisplayskip}{12pt plus 0pt minus 0pt}
+\setlength{\belowdisplayskip}{12pt plus 0pt minus 0pt}
+%% lists
+\setlength{\topsep}{10pt plus 0pt minus 0pt}
+\setlength{\partopsep}{3pt plus 0pt minus 0pt}
+\setlength{\itemsep}{5pt plus 0pt minus 0pt}
+\setlength{\labelsep}{8mm plus 0mm minus 0mm}
+\setlength{\parsep}{\the\parskip}
+\setlength{\listparindent}{\the\parindent}
+%% verbatim
+\setlength{\fboxsep}{5pt plus 0pt minus 0pt}
+
+
+
+\begin{document}
+
+
+
+%titlepage
+\thispagestyle{empty}
+\begin{center}
+\begin{minipage}{0.75\linewidth}
+    \centering
+%Entry1
+    {\uppercase{\huge Analysing the volatility of large, mid and small
+cap shares in South Africa\par}}
+    \vspace{2cm}
+%Author's name
+    {\LARGE \textbf{Joshua Strydom}\par}
+    \vspace{1cm}
+%University logo
+\begin{center}
+    \includegraphics[width=0.3\linewidth]{Tex/Stellenbosch.jpeg}
+\end{center}
+\vspace{1cm}
+%Supervisor's Details
+\begin{center}
+    {\Large \par}
+    \vspace{1cm}
+%Degree
+    {\large Stellenbosch University\par}
+    \vspace{1cm}
+%Institution
+    {\large January 2023\par}
+    \vspace{1cm}
+%Date
+    {\large }
+%More
+    {\normalsize }
+%More
+    {\normalsize }
+\end{center}
+\end{minipage}
+\end{center}
+\clearpage
+
+
+\begin{frontmatter}  %
+
+\title{Analysing the volatility of large, mid and small cap shares in
+South Africa}
+
+% Set to FALSE if wanting to remove title (for submission)
+
+
+
+
+\author[Add1]{Joshua Strydom\footnote{\textbf{Contributions:}
+  \newline \emph{The authors would like to thank no institution for
+  money donated to this project. Thank you sincerely.}}}
+\ead{20718284@sun.ac.za}
+
+
+
+
+
+\address[Add1]{Stellenbosch University, Stellenbosch, South Africa}
+
+
+
+\vspace{1cm}
+
+
+\begin{keyword}
+\footnotesize{
+Volatility \sep ALSI \sep Standard deviation \\
+\vspace{0.3cm}
+}
+\footnotesize{
+\textit{JEL classification} L250 \sep L100
+}
+\end{keyword}
+
+
+
+\vspace{0.5cm}
+
+\end{frontmatter}
+
+
+
+%________________________
+% Header and Footers
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\chead{}
+\rhead{}
+\lfoot{}
+\rfoot{\footnotesize Page \thepage}
+\lhead{}
+%\rfoot{\footnotesize Page \thepage } % "e.g. Page 2"
+\cfoot{}
+
+%\setlength\headheight{30pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%________________________
+
+\headsep 35pt % So that header does not go over title
+
+
+
+
+\hypertarget{introduction}{%
+\section{\texorpdfstring{Introduction
+\label{Introduction}}{Introduction }}\label{introduction}}
+
+In general, small cap stocks tend to have higher volatility than large
+cap stocks, and mid cap stocks tend to fall in between the two in terms
+of volatility. This is because small cap companies typically have less
+established business models and less predictable revenue streams, which
+can lead to greater fluctuations in their stock prices. On the other
+hand, large cap companies tend to have more established business models
+and more predictable revenue streams, which can lead to less volatility
+in their stock prices. In R, one can use the package
+`PerformanceAnalytics' to calculate the volatility of different indexes.
+
+Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
+\& Kahn (\protect\hyperlink{ref-grinold2000}{2000})
+
+\hypertarget{large-cap-shares}{%
+\section{\texorpdfstring{Large cap shares
+\label{Large}}{Large cap shares }}\label{large-cap-shares}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure1-1} 
+
+}
+
+\caption{Large rolling SD \label{Figure1}}\label{fig:Figure1}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure2-1} 
+
+}
+
+\caption{Large cap drawdown chart \label{Figure2}}\label{fig:Figure2}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure3-1} 
+
+}
+
+\caption{Caption Here \label{Figure3}}\label{fig:Figure3}
+\end{figure}
+
+\hypertarget{mid-cap-shares}{%
+\section{\texorpdfstring{Mid cap shares
+\label{Mid}}{Mid cap shares }}\label{mid-cap-shares}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure4-1} 
+
+}
+
+\caption{Caption Here \label{Figure4}}\label{fig:Figure4}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure5-1} 
+
+}
+
+\caption{Caption Here \label{Figure5}}\label{fig:Figure5}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure6-1} 
+
+}
+
+\caption{Caption Here \label{Figure6}}\label{fig:Figure6}
+\end{figure}
+
+\hypertarget{small-cap-shares}{%
+\section{\texorpdfstring{Small cap shares
+\label{Small}}{Small cap shares }}\label{small-cap-shares}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure7-1} 
+
+}
+
+\caption{Caption Here \label{Figure7}}\label{fig:Figure7}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure8-1} 
+
+}
+
+\caption{Caption Here \label{Figure8}}\label{fig:Figure8}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure9-1} 
+
+}
+
+\caption{Caption Here \label{Figure9}}\label{fig:Figure9}
+\end{figure}
+
+\hypertarget{rolling-standard-deviation}{%
+\section{Rolling Standard deviation}\label{rolling-standard-deviation}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure10-1} 
+
+}
+
+\caption{Caption Here \label{Figure10}}\label{fig:Figure10}
+\end{figure}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+         & Standard deviation \\
+        \hline
+        Large cap & 0.01118614 \\
+        Mid cap & 0.001418264 \\
+        Small cap & 0.0002078111 \\
+        \hline
+    \end{tabular}
+    \caption{Standard deviation}
+    \label{tab:SD}
+\end{center}
+\end{table}
+
+Figures \ref{Figure1} and \ref{Figure2}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c | c | c |}
+    \hline
+         & Large cap & Mid cap & Small cap \\
+        \hline
+        Volatility skewness & 1.067183 & 0.9504131 & 0.9286573 \\
+        \hline
+    \end{tabular}
+    \caption{Volatility skewness}
+    \label{tab:VS}
+\end{center}
+\end{table}
+
+The upside/downside ratio is often used to gauge overbought and oversold
+conditions in the market. Low values can indicate that the market is
+reaching oversold levels, while high values can indicate that the market
+is becoming overbought.
+
+\hfill
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+I hope you find this template useful. Remember, stackoverflow is your
+friend - use it to find answers to questions. Feel free to write me a
+mail if you have any questions regarding the use of this package. To
+cite this package, simply type citation(``Texevier'') in Rstudio to get
+the citation for Katzke (\protect\hyperlink{ref-Texevier}{2017}) (Note
+that uncited references in your bibtex file will not be included in
+References).
+
+\newpage
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-fama1997}{}}%
+Fama, E.F. \& French, K.R. 1997. Industry costs of equity. \emph{Journal
+of financial economics}. 43(2):153--193.
+
+\leavevmode\vadjust pre{\hypertarget{ref-grinold2000}{}}%
+Grinold, R.C. \& Kahn, R.N. 2000. Active portfolio management.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Texevier}{}}%
+Katzke, N.F. 2017. \emph{{Texevier}: {P}ackage to create elsevier
+templates for rmarkdown}. Stellenbosch, South Africa: Bureau for
+Economic Research.
+
+\end{CSLReferences}
+
+\hypertarget{appendix}{%
+\section*{Appendix}\label{appendix}}
+\addcontentsline{toc}{section}{Appendix}
+
+\hypertarget{appendix-a}{%
+\subsection*{Appendix A}\label{appendix-a}}
+\addcontentsline{toc}{subsection}{Appendix A}
+
+Some appendix information here
+
+\hypertarget{appendix-b}{%
+\subsection*{Appendix B}\label{appendix-b}}
+\addcontentsline{toc}{subsection}{Appendix B}
+
+\bibliography{Tex/ref}
+
+
+
+
+
+\end{document}
