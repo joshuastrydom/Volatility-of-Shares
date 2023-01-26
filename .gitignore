@@ -54,3 +54,10 @@ data/
 /data
 */data
 data*
+
+Workings.Rmd/
+**/Workings.Rmd
+*/Workings.Rmd/
+/Workings.Rmd
+*/Workings.Rmd
+Workings.Rmd*
