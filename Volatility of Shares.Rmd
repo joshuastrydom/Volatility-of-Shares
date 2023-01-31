@@ -348,7 +348,7 @@ J202plot <- sector(J202sectors)
 
 ```
 
-```{r Mid cap shares, include=FALSE}
+```{r sectors, include=FALSE}
 #mid_caps <- Alsi |> 
 #    filter(Index_Name == "Mid_Caps")
 #mid_caps$Tickers <- gsub(" SJ|Equity","", mid_caps$Tickers)
@@ -364,9 +364,38 @@ J202plot <- sector(J202sectors)
 #    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
 #    theme(legend.position="none") #+
     #theme(text=element_text(family="Garamond", size=14))
+sectors <- Alsi[,c(1,3,11)] |> 
+    group_by(date, Sector) |> 
+    summarise(Sum = sum(Return)) |> 
+    ungroup() |> 
+    filter(!is.na(Sector)) |> 
+    na.omit() |> 
+    spread(Sector, Sum)
+summary(sectors)
+
+StdDev(sectors$Industrials)
 ```
 
-As can be seen in \ref{Figure4}, the large cap index has historically neglected the Property sector and has been dominated mostly by the Industrial and Resource sectors. In earlier periods of the sample (2005 to 2012) Resources dominated Industrials but the opposite became true in later periods.
+\ref{tab:Mean} below is a depiction of the mean daily returns for each sector over the entire period. The Industrials sector clearly generates, on average, the best results by a large magnitude. The Financials sector generates the second highest mean daily returns with the Property and Resources sectors trailing behind. Each indexes goal is to optimise its return profile.
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+        Sector & Mean \\
+        \hline
+        Financials & 0.16530 \\
+        Industrials & 1.342 \\
+        Property & 0.009539 \\
+        Resources & 0.07961 \\
+        \hline
+    \end{tabular}
+    \caption{Mean daily returns}
+    \label{tab:Mean}
+\end{center}
+\end{table}
+
+As can be seen in \ref{Figure4}, the large cap index has historically neglected the Property sector and has been dominated mostly by the Industrial and Resource sectors. In earlier periods of the sample (2005 to 2012) Resources dominated Industrials but the opposite became true in later periods. 
 The weightings in the later portion of the period do not sum to one. This is due to a few mid cap stocks forming part of the FTSE/JSE Top 40 Index but being filtered out for the analysis conducted in this paper.
 
 ```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Large Cap index \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
@@ -389,14 +418,6 @@ J201plot
 #    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
 J202plot
 ```
-
-```{r}
-sectors <- Alsi[,c(1,3,11)] |> 
-    group_by(Sector) |> 
-    tbl_xts(cols_to_xts = Return, spread_by = Sector)
-sum_sectors <- rbind(sectors, sapply(sectors, function(x) if(is.numeric(x)) mean(x, na.rm = TRUE) else ""))
-```
-
 
 # Annualised returns \label{Returns}
 
