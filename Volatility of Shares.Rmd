@@ -281,7 +281,7 @@ The analysis of volatility is based on three indexes of the Johannesburg Securit
 
 ## Drawdowns
 
-A drawdown chart is used to display the worst time for a portfolio under analysis. The charts below display the peak-to-trough decline in each of the indexes value. 
+A drawdown chart is used to display the worst time for a portfolio under analysis. The charts below display the peak-to-trough decline in each of the indexes value. The graphs are important for measuring the historical risk of an investment. A drawdown chart is a measure of downside volatility. 
 
 \ref{Figure1} displays the large cap drawdown chart. 
 
@@ -366,10 +366,15 @@ J202plot <- sector(J202sectors)
     #theme(text=element_text(family="Garamond", size=14))
 ```
 
+As can be seen in \ref{Figure4}, the large cap index has historically neglected the Property sector and has been dominated mostly by the Industrial and Resource sectors. In earlier periods of the sample (2005 to 2012) Resources dominated Industrials but the opposite became true in later periods.
+The weightings in the later portion of the period do not sum to one. This is due to a few mid cap stocks forming part of the FTSE/JSE Top 40 Index but being filtered out for the analysis conducted in this paper.
+
 ```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Large Cap index \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
 #finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 J200plot
 ```
+
+The Industrials sector also dominated the weighting of the mid cap index. Figure \ref{Figure5} displays a consistent domination of the Industrials sector for the index. The Financial sector was assigned the second highest weighting in the latter portion of the period at hand, surpassing the early dominance of the Resources and Property sector. The mid cap index assigns a noticeably greater weight to the property sector when compared to the large cap index. IS THE PROPERTY SECTOR MORE OR LESS STABLE IN SA? The mid cap index is higher on property and lower on resources than the large cap index. COULD THIS BE THE REASON FOR THE LARGE INDEX DOING BETTER THAN THE MID INDEX RETURNS? 
 
 ```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Mid Cap index \\label{Figure5}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
 #chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
@@ -384,6 +389,14 @@ J201plot
 #    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
 J202plot
 ```
+
+```{r}
+sectors <- Alsi[,c(1,3,11)] |> 
+    group_by(Sector) |> 
+    tbl_xts(cols_to_xts = Return, spread_by = Sector)
+sum_sectors <- rbind(sectors, sapply(sectors, function(x) if(is.numeric(x)) mean(x, na.rm = TRUE) else ""))
+```
+
 
 # Annualised returns \label{Returns}
 
@@ -588,6 +601,105 @@ VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
 \end{table}
 
 The upside/downside ratio is often used to gauge overbought and oversold conditions in the market. Low values can indicate that the market is reaching oversold levels, while high values can indicate that the market is becoming overbought.
+
+# Correlation \label{Correlation}
+
+```{r Correlation, include=FALSE}
+correlationreturn <- function(x){
+    index <- x
+    index <- index[,-c(5:10)]
+    index$Tickers <- gsub(" SJ|Equity","", index$Tickers)
+    Total <- index |> 
+        mutate(Contribution = coalesce(Contribution, 0)) |> 
+        group_by(Tickers) |> 
+        mutate(Cumulative_contribution = cumprod(1 + Contribution))
+    Final <- Total[,c(1,2,3)]
+    wide <- spread(Final, Tickers, Return)
+    wide1 <- as.data.frame(wide)
+    wide2 <- wide1[-c(1:1750),]
+    #wide1[is.na(wide1)] = 0 #Made NAs equal to zero so that rowSums function would work
+    xts <- wide2[,c(2:86)] |> 
+        xts(order.by = as.Date(wide2[ , 1], "%Y-%m-%d"))
+    y <- rollapply(xts, width=365, cor, fill = NA, by.column=FALSE)
+    paste_ <- function(...) paste(..., sep = "_")
+    names_mat <- do.call("outer", list(names(xts), names(xts), paste_))
+    names(y) <- names_mat
+    #y$Average_correlation <- rowMeans(y, na.rm=TRUE)
+    e <- y |> 
+        xts_tbl()
+    f <- rbind(e, sapply(e, function(x) if(is.numeric(x)) mean(x, na.rm = TRUE) else ""))
+    last <- f[nrow(f),]
+    long <- last |> 
+        gather(Stocks, Correlation, -date)
+    long1 <- long[,-1]
+    long2 <- arrange(long1, Correlation)
+    long3 <- long2[!duplicated(long2$Correlation), ]
+    long3$Correlation <- as.numeric(as.character(long3$Correlation))
+    #long4 <- long3[!is.nan(long3)] |> 
+    #    filter(long3$Correlation != 1)
+    #long3 = as.numeric(long2[,2]) 
+    return(long3)
+}
+large_corr <- correlationreturn(J200)
+large_corr1 <- large_corr[-c(1493:1494),]
+plot_largecorr <- ggplot(large_corr1, aes(x = Correlation)) +
+    geom_density(color="darkred", fill="red") +
+    geom_vline(aes(xintercept = mean(Correlation)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(limits = c(0, 0.5), labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+#plot_largecorr
+
+mid_corr <- correlationreturn(J201)
+mid_corr1 <- mid_corr[-c(1044:1045),]
+plot_midcorr <- ggplot(mid_corr1, aes(x = Correlation)) +
+    geom_density(color="darkblue", fill="lightblue") +
+    geom_vline(aes(xintercept = mean(Correlation)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(limits = c(0, 0.5), labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+#plot_midcorr
+
+small_corr <- correlationreturn(J202)
+small_corr1 <- small_corr[-c(721:722),]
+plot_smallcorr <- ggplot(small_corr1, aes(x = Correlation)) +
+    geom_density(color="darkgreen", fill="lightgreen") +
+    geom_vline(aes(xintercept = mean(Correlation)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(limits = c(0, 0.5), labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+#plot_smallcorr
+```
+
+```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Correlation Comparison of the Indexes \\label{Figure9}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+corrplot <- ggarrange(plot_largecorr, plot_midcorr, plot_smallcorr + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"),
+          ncol = 3, nrow = 1)
+annotate_figure(corrplot, top = text_grob("Rolling 12-Month Correlation Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 20))
+```
+
 
 \hfill
 
