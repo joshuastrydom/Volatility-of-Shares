@@ -285,12 +285,29 @@ and more predictable revenue streams, which can lead to less volatility
 in their stock prices. In R, one can use the package
 `PerformanceAnalytics' to calculate the volatility of different indexes.
 
-Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
-\& Kahn (\protect\hyperlink{ref-grinold2000}{2000})
+\hypertarget{index-analysis}{%
+\section{\texorpdfstring{Index Analysis
+\label{Index}}{Index Analysis }}\label{index-analysis}}
 
-\hypertarget{large-cap-shares}{%
-\section{\texorpdfstring{Large cap shares
-\label{Large}}{Large cap shares }}\label{large-cap-shares}}
+The analysis of volatility is based on three indexes of the Johannesburg
+Securities Exchange (JSE). Data is attained by filtering out the FTSE
+All Share Index (ALSI). The large cap index is based on the FTSE/JSE Top
+40 Index (J200), the mid cap index is based on the FTSE/JSE Mid Cap
+Index (J201) and the small cap index is based on the FTSE/JSE Small Cap
+Index (J202). The derived returns for each of the separate indexes are
+calculated as the product of a stocks daily return and the assigned
+weight in the respective index. For the large and small cap indexes,
+data from 2005 to 2022 is available. Unfortunately for the mid cap
+index, data is only available from 2016 onward.
+
+\hypertarget{drawdowns}{%
+\subsection{Drawdowns}\label{drawdowns}}
+
+A drawdown chart is used to display the worst time for a portfolio under
+analysis. The charts below display the peak-to-trough decline in each of
+the indexes value.
+
+\ref{Figure1} displays the large cap drawdown chart.
 
 \begin{figure}[H]
 
@@ -298,7 +315,7 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Large rolling SD \label{Figure1}}\label{fig:Figure1}
+\caption{Large Cap drawdown chart \label{Figure1}}\label{fig:Figure1}
 \end{figure}
 
 \begin{figure}[H]
@@ -307,7 +324,7 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Large cap drawdown chart \label{Figure2}}\label{fig:Figure2}
+\caption{Mid Cap drawdown chart \label{Figure2}}\label{fig:Figure2}
 \end{figure}
 
 \begin{figure}[H]
@@ -316,12 +333,11 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Caption Here \label{Figure3}}\label{fig:Figure3}
+\caption{Small Cap drawdown chart \label{Figure3}}\label{fig:Figure3}
 \end{figure}
 
-\hypertarget{mid-cap-shares}{%
-\section{\texorpdfstring{Mid cap shares
-\label{Mid}}{Mid cap shares }}\label{mid-cap-shares}}
+\hypertarget{sector-weightings}{%
+\subsection{Sector weightings}\label{sector-weightings}}
 
 \begin{figure}[H]
 
@@ -329,7 +345,7 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Caption Here \label{Figure4}}\label{fig:Figure4}
+\caption{Sector weights for Large Cap index \label{Figure4}}\label{fig:Figure4}
 \end{figure}
 
 \begin{figure}[H]
@@ -338,7 +354,7 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Caption Here \label{Figure5}}\label{fig:Figure5}
+\caption{Sector weights for Mid Cap index \label{Figure5}}\label{fig:Figure5}
 \end{figure}
 
 \begin{figure}[H]
@@ -347,12 +363,35 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Caption Here \label{Figure6}}\label{fig:Figure6}
+\caption{Sector weights for Small Cap index \label{Figure6}}\label{fig:Figure6}
 \end{figure}
 
-\hypertarget{small-cap-shares}{%
-\section{\texorpdfstring{Small cap shares
-\label{Small}}{Small cap shares }}\label{small-cap-shares}}
+\hypertarget{annualised-returns}{%
+\section{\texorpdfstring{Annualised returns
+\label{Returns}}{Annualised returns }}\label{annualised-returns}}
+
+The idea behind annualising returns is to be able to make direct
+comparisons of returns across different time periods. A rolling
+annualised return calculation was conducted in order to provide a means
+for actual performance comparison for the indexes at hand. As can be
+seen in \ref{Figure7} below, the small cap index consistently
+outperforms both the large and mid cap indexes. An elementary analysis
+based on the figure of how large and small cap shares responded to the
+aftermath of the Global Financial Crisis of 2007/2008 yields interesting
+results. The analysis is limited to the period between 2009 and 2011.
+The small cap index seems to have had enjoyed increasingly positive
+returns subsequent to 2009 which may be due to the fact that the index
+had a low international exposure. The large cap index on the other hand
+did not ride that same proverbial wave and experienced less satisfactory
+returns. Although the returns never turned negative, the level of
+positivity of returns diminished. The annualised returns for the large
+and small indexes were most similar between 2013 and 2015.
+
+The mid cap index outperformed the large cap index from 2016 to
+approximately half way through 2020. Thereafter, the large cap index
+outperformed the mid cap index. It is important to note that the small
+cap index consistently outperformed both the large and mid cap indexes
+throughout the period of analysis.
 
 \begin{figure}[H]
 
@@ -360,25 +399,7 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 }
 
-\caption{Caption Here \label{Figure7}}\label{fig:Figure7}
-\end{figure}
-
-\begin{figure}[H]
-
-{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure8-1} 
-
-}
-
-\caption{Caption Here \label{Figure8}}\label{fig:Figure8}
-\end{figure}
-
-\begin{figure}[H]
-
-{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure9-1} 
-
-}
-
-\caption{Caption Here \label{Figure9}}\label{fig:Figure9}
+\caption{Rolling Annualised Returns of the Indexes \label{Figure7}}\label{fig:Figure7}
 \end{figure}
 
 \hypertarget{rolling-standard-deviation}{%
@@ -387,11 +408,11 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
 
 \begin{figure}[H]
 
-{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure10-1} 
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure8-1} 
 
 }
 
-\caption{Caption Here \label{Figure10}}\label{fig:Figure10}
+\caption{Rolling Annualised Standard Deviation of the Indexes \label{Figure8}}\label{fig:Figure8}
 \end{figure}
 
 \begin{table}[h]
@@ -400,9 +421,9 @@ Fama \& French (\protect\hyperlink{ref-fama1997}{1997: 33}) and Grinold
     \hline
          & Standard deviation \\
         \hline
-        Large cap & 0.01118614 \\
-        Mid cap & 0.001418264 \\
-        Small cap & 0.0002078111 \\
+        Large cap & 0.01298498 \\
+        Mid cap & 0.01039368 \\
+        Small cap & 0.00801369 \\
         \hline
     \end{tabular}
     \caption{Standard deviation}
@@ -418,7 +439,7 @@ Figures \ref{Figure1} and \ref{Figure2}
     \hline
          & Large cap & Mid cap & Small cap \\
         \hline
-        Volatility skewness & 1.067183 & 0.9504131 & 0.9286573 \\
+        Volatility skewness & 1.069731 & 0.9739739 & 1.379238 \\
         \hline
     \end{tabular}
     \caption{Volatility skewness}
@@ -453,13 +474,6 @@ References).
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\vadjust pre{\hypertarget{ref-fama1997}{}}%
-Fama, E.F. \& French, K.R. 1997. Industry costs of equity. \emph{Journal
-of financial economics}. 43(2):153--193.
-
-\leavevmode\vadjust pre{\hypertarget{ref-grinold2000}{}}%
-Grinold, R.C. \& Kahn, R.N. 2000. Active portfolio management.
-
 \leavevmode\vadjust pre{\hypertarget{ref-Texevier}{}}%
 Katzke, N.F. 2017. \emph{{Texevier}: {P}ackage to create elsevier
 templates for rmarkdown}. Stellenbosch, South Africa: Bureau for

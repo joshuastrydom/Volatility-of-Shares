@@ -244,7 +244,6 @@ s_caps <- index(J202)
 
 In general, small cap stocks tend to have higher volatility than large cap stocks, and mid cap stocks tend to fall in between the two in terms of volatility. This is because small cap companies typically have less established business models and less predictable revenue streams, which can lead to greater fluctuations in their stock prices. On the other hand, large cap companies tend to have more established business models and more predictable revenue streams, which can lead to less volatility in their stock prices. In R, one can use the package 'PerformanceAnalytics' to calculate the volatility of different indexes. 
 
-@fama1997[p. 33] and @grinold2000 
 
 ```{r Drawdowns, include=FALSE}
 daily_contri <- function(x){
@@ -258,6 +257,8 @@ drawdown_small <- daily_contri(s_caps)
 
 
 # Index Analysis \label{Index}
+
+The analysis of volatility is based on three indexes of the Johannesburg Securities Exchange (JSE). Data is attained by filtering out the FTSE All Share Index (ALSI). The large cap index is based on the FTSE/JSE Top 40 Index (J200), the mid cap index is based on the FTSE/JSE Mid Cap Index (J201) and the small cap index is based on the FTSE/JSE Small Cap Index (J202). The derived returns for each of the separate indexes are calculated as the product of a stocks daily return and the assigned weight in the respective index. For the large and small cap indexes, data from 2005 to 2022 is available. Unfortunately for the mid cap index, data is only available from 2016 onward.
 
 <!-- The following is a code chunk. It must have its own unique name (after the r), or no name. After the comma follows commands for R which are self-explanatory. By default, the code and messages will not be printed in your pdf, just the output: -->
 
@@ -279,6 +280,10 @@ drawdown_small <- daily_contri(s_caps)
 ```
 
 ## Drawdowns
+
+A drawdown chart is used to display the worst time for a portfolio under analysis. The charts below display the peak-to-trough decline in each of the indexes value. 
+
+\ref{Figure1} displays the large cap drawdown chart. 
 
 ```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large Cap drawdown chart \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
 #finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
@@ -315,11 +320,11 @@ J202sectors <- J202[,c(1,11,10)] |>
     rename(Weight = J202)
 #J200weights <- aggregate(Weight~.,J200sectors,FUN=sum) |> 
 #    group_by(date)
-names = c("Financials","Industrials","Resources","Property")
-ggplot(J200weights) +
-  geom_bar(aes(x=date,y=Weight,fill=factor(Sector, names)),
-           stat='identity') +
-    labs(x = NULL, y = NULL, title = "Sector Weight Comparison", fill = "Sector")
+#names = c("Financials","Industrials","Resources","Property")
+#ggplot(J200weights) +
+#  geom_bar(aes(x=date,y=Weight,fill=factor(Sector, names)),
+#           stat='identity') +
+#    labs(x = NULL, y = NULL, title = "Sector Weight Comparison", fill = "Sector")
 
 sector <- function(x){
     names = c("Financials","Industrials","Resources","Property")
@@ -330,7 +335,7 @@ sector <- function(x){
         geom_bar(aes(x=date, y=Weight, fill=factor(Sector, names)),
                  stat = 'identity', width = 1) +
         scale_y_continuous(labels = scales::percent_format(scale = 100)) +
-        labs(x = NULL, y = NULL, title = "Sector Weight Comparison", fill = "Sector") +
+        labs(x = NULL, y = NULL, title = "Sector Weighting", fill = "Sector") +
         theme_bw() +
         theme(legend.position="bottom")
         return(weights)
@@ -382,6 +387,10 @@ J202plot
 
 # Annualised returns \label{Returns}
 
+The idea behind annualising returns is to be able to make direct comparisons of returns across different time periods. A rolling annualised return calculation was conducted in order to provide a means for actual performance comparison for the indexes at hand. As can be seen in \ref{Figure7} below, the small cap index consistently outperforms both the large and mid cap indexes. An elementary analysis based on the figure of how large and small cap shares responded to the aftermath of the Global Financial Crisis of 2007/2008 yields interesting results. The analysis is limited to the period between 2009 and 2011. The small cap index seems to have had enjoyed increasingly positive returns subsequent to 2009 which may be due to the fact that the index had a low international exposure. The large cap index on the other hand did not ride that same proverbial wave and experienced less satisfactory returns. Although the returns never turned negative, the level of positivity of returns diminished. The annualised returns for the large and small indexes were most similar between 2013 and 2015. 
+
+The mid cap index outperformed the large cap index from 2016 to approximately half way through 2020. Thereafter, the large cap index outperformed the mid cap index. It is important to note that the small cap index consistently outperformed both the large and mid cap indexes throughout the period of analysis. 
+
 ```{r Small cap shares, include=FALSE}
 #small_caps <- Alsi |> 
 #    filter(Index_Name == "Small_Caps")
@@ -431,15 +440,15 @@ plotreturn <- full_return |>
     ungroup() |> 
     ggplot() +
     geom_line(aes(date, RollRets, color = Index), alpha = 0.7, size = 1.25) + 
-    labs(title = "Rolling 3 Year Annualized Returns of large, mid and small cap Indices with differing start dates", 
-    subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", 
+    labs(title = "Rolling 3 Year Annualized Returns with differing start dates", 
+    subtitle = "Large, Mid and Small cap Indexes", x = "", y = "Rolling 3 year Returns (Ann.)", 
     caption = "Note:\nDistortions are not evident now.") + theme_fmx(title.size = ggpts(30), 
-    subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) + 
+    subtitle.size = ggpts(20), caption.size = ggpts(25), CustomCaption = T) + 
     fmx_cols()
 
 ```
 
-```{r Figure7, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Returns of the Indexes \\label{Figure7}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+```{r Figure7, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Returns of the Indexes \\label{Figure7}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
 finplot(plotreturn, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 #finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
@@ -492,14 +501,14 @@ roll_SD <- function(x,y,z){
 full_SD <- roll_SD(l_caps, m_caps, s_caps) |> 
     ggplot() +
         geom_line(aes(x = date, y = SD, color = Index), alpha = 0.7, size = 1) +
-        labs(title = "Rolling 3 Year Annualized SD of Large, Mid and Small cap Indices with differing starting dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-        theme_fmx(title.size = ggpts(30), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+        labs(title = "Rolling 3 Year Annualized SD with differing starting dates", subtitle = "Large, Mid and Small cap Indexes", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+        theme_fmx(title.size = ggpts(30), subtitle.size = ggpts(20), caption.size = ggpts(25), CustomCaption = T) +
     scale_y_continuous(labels = scales::percent_format(scale = 100)) +
     theme(legend.position = "bottom") +
     fmx_cols()
 ```
 
-```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure8}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure8}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
 finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, 
     y.pct = T, y.pct_acc = 1)
 #finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
