@@ -120,6 +120,8 @@ library(tbl2xts)
 library(tidyr)
 library(PerformanceAnalytics)
 library(rvest)
+library(corrplot)
+library(ggpubr)
 ```
 
 ```{r Load data, include=FALSE}
@@ -199,6 +201,41 @@ rolling_SDcum <- function(x){
 }
 ```
 
+```{r Dataframes, include=FALSE}
+# Wrote function to find daily returns for each index given the constituent shares. 
+index <- function(x){
+    index <- x
+    index <- index[,-c(5:10)]
+    index$Tickers <- gsub(" SJ|Equity","", index$Tickers)
+    wide <- spread(index[,c(1,2,7)], Tickers, Contribution)
+    #wide[is.na(wide)] = 0 #Made NAs equal to zero so that rowSums function would work
+    Total <- wide |> 
+      mutate(Contribution = select(wide, 2:ncol(wide)) |> rowSums(na.rm = TRUE)) #Sum of daily returns of each stock for index
+    first <- Total[,1] #Kept the date column
+    last <- Total[,ncol(Total)] #Kept the contribution column
+    Final <- data.frame(first,last) #Merged the dateframes
+    colnames(Final)[1] <- "date"
+    colnames(Final)[2] <- "Daily_return"
+    Cum <- Final |> 
+        mutate(Cumulative_returns = cumprod(1 + Daily_return)) |>#Get cumulative returns for the index
+        filter(Daily_return != 0) #Filtered out rows that did not contribute. 
+    return(Cum)
+}
+J200 <- Alsi |> 
+    filter(Index_Name == "Large_Caps") |> 
+    mutate(Contribution = Return*J200)
+l_caps <- index(J200)
+
+J201 <- Alsi |> 
+    filter(Index_Name == "Mid_Caps") |> 
+    mutate(Contribution = Return*J201)
+m_caps <- index(J201)
+J202 <- Alsi |> 
+    filter(Index_Name == "Small_Caps") |> 
+    mutate(Contribution = Return*J202)
+s_caps <- index(J202)
+```
+
 <!-- ############################## -->
 <!-- # Start Writing here: -->
 <!-- ############################## -->
@@ -209,156 +246,273 @@ In general, small cap stocks tend to have higher volatility than large cap stock
 
 @fama1997[p. 33] and @grinold2000 
 
-# Large cap shares \label{Large}
+```{r Drawdowns, include=FALSE}
+daily_contri <- function(x){
+    xts <- tbl_xts(x)
+    return(xts)
+}
+drawdown_large <- daily_contri(l_caps)
+drawdown_mid <- daily_contri(m_caps)
+drawdown_small <- daily_contri(s_caps)
+```
+
+
+# Index Analysis \label{Index}
 
 <!-- The following is a code chunk. It must have its own unique name (after the r), or no name. After the comma follows commands for R which are self-explanatory. By default, the code and messages will not be printed in your pdf, just the output: -->
 
 ```{r Large cap shares, include=FALSE}
-large_caps <- Alsi |> 
-    filter(Index_Name == "Large_Caps")
-large_caps$Tickers <- gsub(" SJ|Equity","", large_caps$Tickers)
-large <- contribution(large_caps)
-daily_large <- daily_contri(large)
+#large_caps <- Alsi |> 
+#    filter(Index_Name == "Large_Caps")
+#large_caps$Tickers <- gsub(" SJ|Equity","", large_caps$Tickers)
+#large <- contribution(large_caps)
+#daily_large <- daily_contri(large)
 #colnames(daily_large)[1] <- "large_daily_return"
-rolling_large <- rolling_contri(large)
-rolling_large1 <- rolling_SDcum(large_caps) |> 
-    ggplot() +
-    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
-    labs(title = "Rolling 3 Year Annualized SD of various large cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
-    theme(legend.position="none") #+
+#rolling_large <- rolling_contri(large)
+#rolling_large1 <- rolling_SDcum(large_caps) |> 
+#    ggplot() +
+#    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+#    labs(title = "Rolling 3 Year Annualized SD of various large cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+#    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+#    theme(legend.position="none") #+
     #theme(text=element_text(family="Garamond", size=14))
 ```
 
-```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large rolling SD \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
-finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
-```
+## Drawdowns
 
-```{r Figure2, warning =  FALSE, fig.align = 'center', fig.cap = "Large cap drawdown chart \\label{Figure2}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-chart.Drawdown(daily_large$Daily_return,main = "Drawdowns: Large caps in J203", 
+```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large Cap drawdown chart \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
+#finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+chart.Drawdown(drawdown_large$Daily_return,main = "Drawdowns: Large Caps", 
                col = "steelblue")
 ```
 
-```{r Figure3, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure3}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-ggplot(daily_large, aes(x = Index, y = Cum_Ret)) + 
-    geom_line() +
-    theme_bw() +
-    labs(title = "Large cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```{r Figure2, warning =  FALSE, fig.align = 'center', fig.cap = "Mid Cap drawdown chart \\label{Figure2}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+chart.Drawdown(drawdown_mid$Daily_return,main = "Drawdowns: Mid Caps", 
+               col = "steelblue")
 ```
 
-# Mid cap shares \label{Mid}
+```{r Figure3, warning =  FALSE, fig.align = 'center', fig.cap = "Small Cap drawdown chart \\label{Figure3}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+chart.Drawdown(drawdown_small$Daily_return,main = "Drawdowns: Small Caps", 
+               col = "steelblue")
+#ggplot(daily_large, aes(x = Index, y = Cum_Ret)) + 
+#    geom_line() +
+#    theme_bw() +
+#    labs(title = "Large cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```
+
+## Sector weightings
+
+```{r Weightings, include=FALSE}
+#Weight comparision chart for sectors
+J200sectors <- J200[,c(1,11,8)] |> 
+    group_by(Sector) |> 
+    rename(Weight = J200)
+J201sectors <- J201[,c(1,11,9)] |> 
+    group_by(Sector) |> 
+    rename(Weight = J201)
+J202sectors <- J202[,c(1,11,10)] |> 
+    group_by(Sector) |> 
+    rename(Weight = J202)
+#J200weights <- aggregate(Weight~.,J200sectors,FUN=sum) |> 
+#    group_by(date)
+names = c("Financials","Industrials","Resources","Property")
+ggplot(J200weights) +
+  geom_bar(aes(x=date,y=Weight,fill=factor(Sector, names)),
+           stat='identity') +
+    labs(x = NULL, y = NULL, title = "Sector Weight Comparison", fill = "Sector")
+
+sector <- function(x){
+    names = c("Financials","Industrials","Resources","Property")
+    filtered <- x
+    weights <- aggregate(Weight~., x,FUN=sum) |> 
+        group_by(date) |> 
+        ggplot() +
+        geom_bar(aes(x=date, y=Weight, fill=factor(Sector, names)),
+                 stat = 'identity', width = 1) +
+        scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+        labs(x = NULL, y = NULL, title = "Sector Weight Comparison", fill = "Sector") +
+        theme_bw() +
+        theme(legend.position="bottom")
+        return(weights)
+}
+J200plot <- sector(J200sectors)
+
+J201plot <- sector(J201sectors)
+
+J202plot <- sector(J202sectors)
+
+```
 
 ```{r Mid cap shares, include=FALSE}
-mid_caps <- Alsi |> 
-    filter(Index_Name == "Mid_Caps")
-mid_caps$Tickers <- gsub(" SJ|Equity","", mid_caps$Tickers)
-mid <- contribution(mid_caps)
-mid1 <- contributionmid(mid_caps)
-daily_mid <- daily_contri(mid)
+#mid_caps <- Alsi |> 
+#    filter(Index_Name == "Mid_Caps")
+#mid_caps$Tickers <- gsub(" SJ|Equity","", mid_caps$Tickers)
+#mid <- contribution(mid_caps)
+#mid1 <- contributionmid(mid_caps)
+#daily_mid <- daily_contri(mid)
 #colnames(daily_mid)[1] <- "mid_daily_return"
-rolling_mid <- rolling_contri(mid)
-rolling_mid1 <- rolling_SDcum(mid_caps) |> 
-    ggplot() +
-    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
-    labs(title = "Rolling 3 Year Annualized SD of various mid cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
-    theme(legend.position="none") #+
+#rolling_mid <- rolling_contri(mid)
+#rolling_mid1 <- rolling_SDcum(mid_caps) |> 
+#    ggplot() +
+#    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+#    labs(title = "Rolling 3 Year Annualized SD of various mid cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+#    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+#    theme(legend.position="none") #+
     #theme(text=element_text(family="Garamond", size=14))
 ```
 
-```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Large Cap index \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+#finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+J200plot
 ```
 
-```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure5}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
-               col = "steelblue")
+```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Mid Cap index \\label{Figure5}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+#chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
+#               col = "steelblue")
+J201plot
 ```
 
-```{r Figure6, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure6}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-ggplot(daily_mid, aes(x = Index, y = Cum_Ret)) + 
-    geom_line() +
-    theme_bw() +
-    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```{r Figure6, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Small Cap index \\label{Figure6}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+#ggplot(daily_mid, aes(x = Index, y = Cum_Ret)) + 
+#    geom_line() +
+#    theme_bw() +
+#    labs(title = "Mid cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+J202plot
 ```
 
-# Small cap shares \label{Small}
+# Annualised returns \label{Returns}
 
 ```{r Small cap shares, include=FALSE}
-small_caps <- Alsi |> 
-    filter(Index_Name == "Small_Caps")
-small_caps$Tickers <- gsub(" SJ|Equity","", small_caps$Tickers)
-small <- contribution(small_caps)
-small1 <- contributionsmall(small_caps)
-daily_small <- daily_contri(small)
+#small_caps <- Alsi |> 
+#    filter(Index_Name == "Small_Caps")
+#small_caps$Tickers <- gsub(" SJ|Equity","", small_caps$Tickers)
+#small <- contribution(small_caps)
+#small1 <- contributionsmall(small_caps)
+#daily_small <- daily_contri(small)
 #colnames(daily_small)[1] <- "small_daily_return"
-rolling_small <- rolling_contri(small)
-roll <- rolling_SDcum(small_caps)
-rolling_small1 <- rolling_SDcum(small_caps) |> 
-    filter(RollSD < 0.4) |> 
-    ggplot() +
-    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
-    labs(title = "Rolling 3 Year Annualized SD of various small cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
-    theme(legend.position="none") #+
+#rolling_small <- rolling_contri(small)
+#roll <- rolling_SDcum(small_caps)
+#rolling_small1 <- rolling_SDcum(small_caps) |> 
+#    filter(RollSD < 0.4) |> 
+#    ggplot() +
+#    geom_line(aes(x = date, y = RollSD, color = Tickers), alpha = 0.7, size = 1.25) +
+#    labs(title = "Rolling 3 Year Annualized SD of various small cap stocks with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+#    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+#    theme(legend.position="none") #+
     #theme(text=element_text(family="Garamond", size=14))
 ```
 
-```{r Figure7, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure7}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```{r Annual returns, include=FALSE}
+#Rolling annualised returns of indices
+roll_annualreturn <- function(x,y,z){
+    large <- x[,-c(3)]
+    colnames(large)[2] <- "Large_Cap"
+    mid <- y[,-c(3)]
+    colnames(mid)[2] <- "Mid_Cap"
+    small <- z[,-c(3)]
+    colnames(small)[2] <- "Small_Cap"
+    joined <- list(large,mid,small) |> 
+        reduce(full_join, by='date') |> 
+        gather(Index, Return, -date) |> 
+        arrange(date) |> 
+        filter(!is.na(Return)) |> 
+        mutate(YM = format(date, "%Y%B")) |> 
+        arrange(date) |> 
+        group_by(Index, YM) |> 
+        filter(date == last(date))
+    return(joined)
+}
+full_return <- roll_annualreturn(l_caps, m_caps, s_caps)
+plotreturn <- full_return |> 
+    group_by(Index) |> 
+    mutate(RollRets = RcppRoll::roll_prod(1 + Return, 36, fill = NA, align = "right")^(12/36) - 1) |> 
+    group_by(date) |> 
+    filter(any(!is.na(RollRets))) |> 
+    ungroup() |> 
+    ggplot() +
+    geom_line(aes(date, RollRets, color = Index), alpha = 0.7, size = 1.25) + 
+    labs(title = "Rolling 3 Year Annualized Returns of large, mid and small cap Indices with differing start dates", 
+    subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", 
+    caption = "Note:\nDistortions are not evident now.") + theme_fmx(title.size = ggpts(30), 
+    subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) + 
+    fmx_cols()
+
 ```
 
-```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure8}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-chart.Drawdown(daily_small$Daily_return,main = "Drawdowns: Small caps in J203", 
-               col = "steelblue")
-```
-
-```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure9}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-ggplot(daily_small, aes(x = Index, y = Cum_Ret)) + 
-    geom_line() +
-    theme_bw() +
-    labs(title = "Small cap shares in J203 cumulative Return", y = "Growth of R1 invested in 2005.")
+```{r Figure7, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Returns of the Indexes \\label{Figure7}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+finplot(plotreturn, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+#finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
 
 # Rolling Standard deviation  \label{Standard deviation}
 
 ```{r Join, include=FALSE}
-ljoin <- large
+ljoin <- l_caps[,c(1,2)]
 colnames(ljoin)[2] <- "large_dailyreturn"
-mjoin <- mid
+mjoin <- m_caps[,c(1,2)]
 colnames(mjoin)[2] <- "mid_dailyreturn"
-sjoin <- small
+sjoin <- s_caps[,c(1,2)]
 colnames(sjoin)[2] <- "small_dailyreturn"
-join <- list(ljoin, mjoin, sjoin) |>
-    reduce(full_join, by='date') |> 
-    gather(Index, Return, -date) |> 
-    mutate(YM = format(date, "%Y%B")) |> 
-    arrange(date) |> 
-    group_by(Index, YM) |> 
-    filter(date == last(date)) |> 
-    group_by(Index) |> 
-    select(date, Index, Return) |> 
-    mutate(RollSD = RcppRoll::roll_sd(1 + Return, 36, fill = NA, align = "right") * sqrt(12)) |> 
-    filter(!is.na(RollSD)) |> 
-    ggplot() +
-    geom_line(aes(x = date, y = RollSD, color = Index), alpha = 0.7, size = 1.25) +
-    labs(title = "Illustration of Rolling 3 Year Annualized SD of various Indices with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
-    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
+#join <- list(ljoin, mjoin, sjoin) |>
+#    reduce(full_join, by='date') |> 
+#    gather(Index, Return, -date) |> 
+#    mutate(YM = format(date, "%Y%B")) |> 
+#    arrange(date) |> 
+#    group_by(Index, YM) |> 
+#    filter(date == last(date)) |> 
+#    group_by(Index) |> 
+#    select(date, Index, Return) |> 
+#    mutate(RollSD = RcppRoll::roll_sd(1 + Return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+#    filter(!is.na(RollSD)) |> 
+#    ggplot() +
+#    geom_line(aes(x = date, y = RollSD, color = Index), alpha = 0.7, size = 1.25) +
+#    labs(title = "Illustration of Rolling 3 Year Annualized SD of various Indices with differing start dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+#    theme_fmx(title.size = ggpts(25), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) #+
     #theme(text=element_text(family="Garamond", size=14))
+
+roll_SD <- function(x,y,z){
+    large <- x |>
+        mutate(Large_Cap = RcppRoll::roll_sd(1 + Daily_return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Large_Cap))
+    l <- large[,c(1,4)]
+    mid <- y |> 
+        mutate(Mid_Cap = RcppRoll::roll_sd(1 + Daily_return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Mid_Cap))
+    m <- mid[,c(1,4)]
+    small <- z |> 
+        mutate(Small_Cap = RcppRoll::roll_sd(1 + Daily_return, 36, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Small_Cap))
+    s <- small[,c(1,4)]
+    joined <- list(l,m,s) |> 
+        reduce(full_join, by='date') |> 
+        gather(Index, SD, -date) |> 
+        arrange(date)
+    return(joined)
+}
+full_SD <- roll_SD(l_caps, m_caps, s_caps) |> 
+    ggplot() +
+        geom_line(aes(x = date, y = SD, color = Index), alpha = 0.7, size = 1) +
+        labs(title = "Rolling 3 Year Annualized SD of Large, Mid and Small cap Indices with differing starting dates", subtitle = "", x = "", y = "Rolling 3 year Returns (Ann.)", caption = "Note:\nDistortions are not evident now.") + 
+        theme_fmx(title.size = ggpts(30), subtitle.size = ggpts(5), caption.size = ggpts(25), CustomCaption = T) +
+    scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(legend.position = "bottom") +
+    fmx_cols()
 ```
 
-```{r Figure10, warning =  FALSE, fig.align = 'center', fig.cap = "Caption Here \\label{Figure10}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
-finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure8}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, 
+    y.pct = T, y.pct_acc = 1)
+#finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
 
 ```{r STD, include=FALSE}
-#largevol <- StdDev(large$large_daily_return)
-#midvol <- StdDev(mid$mid_daily_return)
-#smallvol <- StdDev(small$small_daily_return)
+largevol <- StdDev(l_caps$Daily_return)
+midvol <- StdDev(m_caps$Daily_return)
+smallvol <- StdDev(s_caps$Daily_return)
 
-#cat("Large volatility: ", largevol, "\n")
-#cat("Mid volatility: ", midvol, "\n")
-#cat("Small volatility: ", smallvol)
+cat("Large volatility: ", largevol, "\n")
+cat("Mid volatility: ", midvol, "\n")
+cat("Small volatility: ", smallvol)
 ```
 
 \begin{table}[h]
@@ -367,9 +521,9 @@ finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T,
     \hline
          & Standard deviation \\
         \hline
-        Large cap & 0.01118614 \\
-        Mid cap & 0.001418264 \\
-        Small cap & 0.0002078111 \\
+        Large cap & 0.01298498 \\
+        Mid cap & 0.01039368 \\
+        Small cap & 0.00801369 \\
         \hline
     \end{tabular}
     \caption{Standard deviation}
@@ -404,10 +558,10 @@ Figures \ref{Figure1}  and \ref{Figure2}
 <!-- :::::: -->
 
 ```{r vol,include=FALSE}
-#vol_returns <- list(ljoin, mjoin, sjoin) |>
-#    reduce(full_join, by='date') |> 
-#    tbl_xts()
-#VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
+vol_returns <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    tbl_xts()
+VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
 ```
 
 \begin{table}[h]
@@ -416,7 +570,7 @@ Figures \ref{Figure1}  and \ref{Figure2}
     \hline
          & Large cap & Mid cap & Small cap \\
         \hline
-        Volatility skewness & 1.067183 & 0.9504131 & 0.9286573 \\
+        Volatility skewness & 1.069731 & 0.9739739 & 1.379238 \\
         \hline
     \end{tabular}
     \caption{Volatility skewness}
