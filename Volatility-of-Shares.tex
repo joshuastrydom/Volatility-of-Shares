@@ -305,7 +305,9 @@ index, data is only available from 2016 onward.
 
 A drawdown chart is used to display the worst time for a portfolio under
 analysis. The charts below display the peak-to-trough decline in each of
-the indexes value.
+the indexes value. The graphs are important for measuring the historical
+risk of an investment. A drawdown chart is a measure of downside
+volatility.
 
 \ref{Figure1} displays the large cap drawdown chart.
 
@@ -339,6 +341,39 @@ the indexes value.
 \hypertarget{sector-weightings}{%
 \subsection{Sector weightings}\label{sector-weightings}}
 
+\ref{tab:Mean} below is a depiction of the mean daily returns for each
+sector over the entire period. The Industrials sector clearly generates,
+on average, the best results by a large magnitude. The Financials sector
+generates the second highest mean daily returns with the Property and
+Resources sectors trailing behind. Each indexes goal is to optimise its
+return profile.
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+        Sector & Mean \\
+        \hline
+        Financials & 0.16530 \\
+        Industrials & 1.342 \\
+        Property & 0.009539 \\
+        Resources & 0.07961 \\
+        \hline
+    \end{tabular}
+    \caption{Mean daily returns}
+    \label{tab:Mean}
+\end{center}
+\end{table}
+
+As can be seen in \ref{Figure4}, the large cap index has historically
+neglected the Property sector and has been dominated mostly by the
+Industrial and Resource sectors. In earlier periods of the sample (2005
+to 2012) Resources dominated Industrials but the opposite became true in
+later periods. The weightings in the later portion of the period do not
+sum to one. This is due to a few mid cap stocks forming part of the
+FTSE/JSE Top 40 Index but being filtered out for the analysis conducted
+in this paper.
+
 \begin{figure}[H]
 
 {\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure4-1} 
@@ -347,6 +382,17 @@ the indexes value.
 
 \caption{Sector weights for Large Cap index \label{Figure4}}\label{fig:Figure4}
 \end{figure}
+
+The Industrials sector also dominated the weighting of the mid cap
+index. Figure \ref{Figure5} displays a consistent domination of the
+Industrials sector for the index. The Financial sector was assigned the
+second highest weighting in the latter portion of the period at hand,
+surpassing the early dominance of the Resources and Property sector. The
+mid cap index assigns a noticeably greater weight to the property sector
+when compared to the large cap index. IS THE PROPERTY SECTOR MORE OR
+LESS STABLE IN SA? The mid cap index is higher on property and lower on
+resources than the large cap index. COULD THIS BE THE REASON FOR THE
+LARGE INDEX DOING BETTER THAN THE MID INDEX RETURNS?
 
 \begin{figure}[H]
 
@@ -402,18 +448,29 @@ throughout the period of analysis.
 \caption{Rolling Annualised Returns of the Indexes \label{Figure7}}\label{fig:Figure7}
 \end{figure}
 
-\hypertarget{rolling-standard-deviation}{%
-\section{\texorpdfstring{Rolling Standard deviation
-\label{Standard deviation}}{Rolling Standard deviation }}\label{rolling-standard-deviation}}
-
 \begin{figure}[H]
 
 {\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure8-1} 
 
 }
 
-\caption{Rolling Annualised Standard Deviation of the Indexes \label{Figure8}}\label{fig:Figure8}
+\caption{Rolling 12-Month Returns Comparison (past 10 Years) \label{Figure8}}\label{fig:Figure8}
 \end{figure}
+
+\hypertarget{rolling-standard-deviation}{%
+\section{\texorpdfstring{Rolling Standard deviation
+\label{Standard deviation}}{Rolling Standard deviation }}\label{rolling-standard-deviation}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure9-1} 
+
+}
+
+\caption{Rolling Annualised Standard Deviation of the Indexes \label{Figure9}}\label{fig:Figure9}
+\end{figure}
+
+\includegraphics{Volatility-of-Shares_files/figure-latex/unnamed-chunk-1-1.pdf}
 
 \begin{table}[h]
 \begin{center}
@@ -451,6 +508,19 @@ The upside/downside ratio is often used to gauge overbought and oversold
 conditions in the market. Low values can indicate that the market is
 reaching oversold levels, while high values can indicate that the market
 is becoming overbought.
+
+\hypertarget{correlation}{%
+\section{\texorpdfstring{Correlation
+\label{Correlation}}{Correlation }}\label{correlation}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{Volatility-of-Shares_files/figure-latex/Figure10-1} 
+
+}
+
+\caption{Rolling Correlation Comparison of the Indexes \label{Figure10}}\label{fig:Figure10}
+\end{figure}
 
 \hfill
 

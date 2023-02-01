@@ -281,15 +281,17 @@ The analysis of volatility is based on three indexes of the Johannesburg Securit
 
 ## Drawdowns
 
-A drawdown chart is used to display the worst time for a portfolio under analysis. The charts below display the peak-to-trough decline in each of the indexes value. The graphs are important for measuring the historical risk of an investment. A drawdown chart is a measure of downside volatility. 
+A drawdown chart is used to illustrate the worst periods of time for a portfolio under analysis. The graphs are important for measuring the historical risk of an investment as they display the peak-to-trough decline in each of the indexes value.  A drawdown chart is essentially a measure of downside volatility. 
 
-\ref{Figure1} displays the large cap drawdown chart. 
+The large cap index in Figure\ref{Figure1} experienced its most drastic drawdown between 2008 and 2009 but most drawdowns were in the vicinity of between 0 and -0.2. . This is not surprising as the large cap index has a relatively large international exposure and hence, the aftermath of the Global Financial Crisis (GFC) would have been heavy hitting on the returns of the index. The next major drawdown occured in the period during the COVID-19 pandemic. The large cap index is thus highly reactive to times of economic crisis. This is no surprise. 
 
 ```{r Figure1,  warning =  FALSE, fig.align = 'center', fig.cap = "Large Cap drawdown chart \\label{Figure1}", fig.ext = 'png', fig.height = 3, fig.width = 6}
 #finplot(rolling_large1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 chart.Drawdown(drawdown_large$Daily_return,main = "Drawdowns: Large Caps", 
                col = "steelblue")
 ```
+
+It is unfortunate that data could not be obtained for the mid cap index for the full sample period. During the COVID-19 pandemic, the mid cap index responded very similarly to the large cap index. I attribute this common drawdown to the fact that the pandemic was not selective on which stocks within an index would be more or less affected. The pandemic was a global crisis and had nothing to do with an index's amount of international exposure. The GFC would have more of an impact on an index with high international exposure compared to one with lower international exposure. 
 
 ```{r Figure2, warning =  FALSE, fig.align = 'center', fig.cap = "Mid Cap drawdown chart \\label{Figure2}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
 chart.Drawdown(drawdown_mid$Daily_return,main = "Drawdowns: Mid Caps", 
@@ -488,57 +490,71 @@ finplot(plotreturn, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pc
 ```
 
 ```{r ret compare, include=FALSE}
+b <- full_return |> 
+    group_by(Index) |> 
+    mutate(RollRets = RcppRoll::roll_prod(1 + Return, 12, fill = NA, align = "right")^(12/12) - 1) |> 
+    group_by(date) |> 
+    filter(any(!is.na(RollRets))) |> 
+    ungroup() 
+c <- b[-c(1:146),-c(3,4)] |> 
+    spread(Index, RollRets)
 return_density <- full_return[,-4] |>
     spread(Index, Return)
-return_density_large <- ggplot(return_density[-c(1:84),c(1,2)], aes(x = Large_Cap)) +
+#return_density[-c(1:84),c(1,2)]
+return_density_large <- ggplot(c[,c(1,2)], aes(x = Large_Cap)) +
     geom_density(color = "darkred", fill = "red") +
     geom_vline(aes(xintercept = mean(Large_Cap)), 
              linetype = "dashed", size = 0.6) +
     coord_flip() +
-    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(-0.05, 0.1), labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
 
-return_density_mid <- ggplot(return_density[-c(1:84),c(1,3)], aes(x = Mid_Cap)) +
+mid_density <- c[,c(1,3)] |> 
+    na.omit()
+return_density_mid <- ggplot(mid_density, aes(x = Mid_Cap)) +
     geom_density(color = "darkblue", fill = "lightblue") +
     geom_vline(aes(xintercept = mean(Mid_Cap)), 
              linetype = "dashed", size = 0.6, na.rm = FALSE) +
     coord_flip() +
-    scale_x_continuous(limits = c(-0.04, 0.03), labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(-0.05, 0.1), labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
-
-return_density_small <- ggplot(return_density[-c(1:84),c(1,4)], aes(x = Small_Cap)) +
+#return_density[-c(1:84),c(1,4)]
+return_density_small <- ggplot(c[,c(1,4)], aes(x = Small_Cap)) +
     geom_density(color = "darkgreen", fill = "lightgreen") +
     geom_vline(aes(xintercept = mean(Small_Cap)), 
              linetype = "dashed", size = 0.6) +
     coord_flip() +
-    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(-0.05, 0.1), labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
 ```
 
-```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling 12-Month Returns Comparison (past 10 Years) \\label{Figure8}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling 12-Month Returns Comparison (past 10 Years) \\label{Figure8}", fig.height = 4, fig.width = 6, fig.ext = 'png'}
 retplot <- ggarrange(return_density_large, return_density_mid, return_density_small + rremove("x.text"), 
-          labels = c("Large Cap", "Mid Cap", "Small Cap"), align = "h", common.legend = TRUE,
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), align = "h", common.legend = TRUE, font.label = list(size = 10, color = "black"),
           ncol = 3, nrow = 1)
 annotate_figure(retplot, top = text_grob("Rolling 12-Month Return Comparison (past 10 Years)", 
-               color = "black", face = "bold", size = 20))
+               color = "black", face = "bold", size = 11))
 ```
 
 # Rolling Standard deviation  \label{Standard deviation}
@@ -603,69 +619,121 @@ finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T,
 ```
 
 ```{r sd compare, include=FALSE}
-vol_returns <- list(ljoin, mjoin, sjoin) |>
-    reduce(full_join, by='date') |> 
-    rename(Large_Cap = large_dailyreturn) |> 
-    rename(Mid_Cap = mid_dailyreturn) |> 
-    rename(Small_Cap = small_dailyreturn) |> 
-    gather(Index, SD, -date) |> 
-    arrange(date) |> 
-    filter(!is.na(SD)) |> 
-    mutate(YM = format(date, "%Y%B")) |> 
-    arrange(date) |> 
-    group_by(Index, YM) |> 
-    filter(date == last(date))
-SD <- roll_SD(l_caps, m_caps, s_caps) |> 
-    arrange(date) |> 
-    filter(!is.na(SD)) |> 
-    mutate(YM = format(date, "%Y%B")) |> 
-    arrange(date) |> 
-    group_by(Index, YM) |> 
-    filter(date == last(date))
-SD_density <- SD[,-4] |>
-    spread(Index, SD)
+roll_SD_1 <- function(x,y,z,d){
+    full <- d |> 
+        group_by(Index) |> 
+        select(date, Index, Return) |> 
+        mutate(RollSD = RcppRoll::roll_sd(1 + Return, 12, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(RollSD))
+    large <- x |>
+        mutate(YM = format(date, "%Y%B")) |> 
+        arrange(date) |> 
+        group_by(large_dailyreturn, YM) |>  
+        filter(date == last(date)) |> 
+        group_by(Tickers) |> 
+        mutate(Large_Cap = RcppRoll::roll_sd(1 + Daily_return, 12, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Large_Cap))
+    l <- large[,c(1,4)]
+    mid <- y |> 
+        mutate(Mid_Cap = RcppRoll::roll_sd(1 + Daily_return, 12, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Mid_Cap))
+    m <- mid[,c(1,4)]
+    small <- z |> 
+        mutate(Small_Cap = RcppRoll::roll_sd(1 + Daily_return, 12, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(Small_Cap))
+    s <- small[,c(1,4)]
+    joined <- list(l,m,s) |> 
+        reduce(full_join, by='date') |> 
+        gather(Index, SD, -date) |> 
+        arrange(date)
+    return(full)
+}
 
-sd_density_large <- ggplot(SD_density[-c(1:83),c(1,2)], aes(x = Large_Cap)) +
+#vol_returns <- list(ljoin, mjoin, sjoin) |>
+#    reduce(full_join, by='date') |> 
+#    rename(Large_Cap = large_dailyreturn) |> 
+#    rename(Mid_Cap = mid_dailyreturn) |> 
+#    rename(Small_Cap = small_dailyreturn) |> 
+#    gather(Index, SD, -date) |> 
+#    arrange(date) |> 
+#    filter(!is.na(SD)) |> 
+#    mutate(YM = format(date, "%Y%B")) |> 
+#    arrange(date) |> 
+#    group_by(Index, YM) |> 
+#    filter(date == last(date))
+
+full <- full_return |> 
+        group_by(Index) |> 
+        select(date, Index, Return) |> 
+        mutate(RollSD = RcppRoll::roll_sd(1 + Return, 12, fill = NA, align = "right") * sqrt(12)) |> 
+        filter(!is.na(RollSD))
+SD_density <- full[,-3] |>
+    spread(Index, RollSD)
+
+#SD <- roll_SD_1(l_caps, m_caps, s_caps) |> 
+#    arrange(date) |> 
+#    filter(!is.na(SD)) |> 
+#    mutate(YM = format(date, "%Y%B")) |> 
+#    arrange(date) |> 
+#    group_by(Index, YM) |> 
+#    filter(date == last(date))
+#SD_density <- SD[,-4] |>
+#    spread(Index, SD)
+
+sd_density_large <- ggplot(SD_density[-c(1:73),c(1,2)], aes(x = Large_Cap)) +
     geom_density(color = "darkred", fill = "red") +
     geom_vline(aes(xintercept = mean(Large_Cap)), 
              linetype = "dashed", size = 0.6) +
     coord_flip() +
-    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(0.01, 0.04),labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
 
-sd_density_mid <- ggplot(SD_density[-c(1:83),c(1,3)], aes(x = Mid_Cap)) +
+sd_mid <- SD_density[,c(1,3)] |> 
+    na.omit()
+sd_density_mid <- ggplot(sd_mid, aes(x = Mid_Cap)) +
     geom_density(color = "darkblue", fill = "lightblue") +
     geom_vline(aes(xintercept = mean(Mid_Cap)), 
              linetype = "dashed", size = 0.6, na.rm = FALSE) +
     coord_flip() +
-    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(0.01, 0.04), labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
 
-sd_density_small <- ggplot(SD_density[-c(1:83),c(1,4)], aes(x = Small_Cap)) +
+sd_density_small <- ggplot(SD_density[-c(1:73),c(1,4)], aes(x = Small_Cap)) +
     geom_density(color = "darkgreen", fill = "lightgreen") +
     geom_vline(aes(xintercept = mean(Small_Cap)), 
              linetype = "dashed", size = 0.6) +
     coord_flip() +
-    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    scale_x_continuous(limits = c(0.01, 0.04), labels = scales::percent_format(scale = 100)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
     theme(legend.position="none")
+```
+
+```{r Figure10, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling 12-month Risk Comparison (past 10 Years) \\label{Figure10}", fig.height = 4, fig.width = 6, fig.ext = 'png'}
+sdplot <- ggarrange(sd_density_large, sd_density_mid, sd_density_small + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), font.label = list(size = 10, color = "black"),
+          ncol = 3, nrow = 1)
+annotate_figure(sdplot, top = text_grob("Rolling 12-Month Risk Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 11))
 ```
 
 
@@ -793,6 +861,7 @@ plot_largecorr <- ggplot(large_corr1, aes(x = Correlation)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
@@ -810,6 +879,7 @@ plot_midcorr <- ggplot(mid_corr1, aes(x = Correlation)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
@@ -827,6 +897,7 @@ plot_smallcorr <- ggplot(small_corr1, aes(x = Correlation)) +
     theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
@@ -834,12 +905,12 @@ plot_smallcorr <- ggplot(small_corr1, aes(x = Correlation)) +
 #plot_smallcorr
 ```
 
-```{r Figure10, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Correlation Comparison of the Indexes \\label{Figure10}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+```{r Figure11, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Correlation Comparison of the Indexes \\label{Figure11}", fig.height = 4, fig.width = 6, fig.ext = 'png'}
 corrplot <- ggarrange(plot_largecorr, plot_midcorr, plot_smallcorr + rremove("x.text"), 
-          labels = c("Large Cap", "Mid Cap", "Small Cap"),
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), font.label = list(size = 10, color = "black"),
           ncol = 3, nrow = 1)
 annotate_figure(corrplot, top = text_grob("Rolling 12-Month Correlation Comparison (past 10 Years)", 
-               color = "black", face = "bold", size = 20))
+               color = "black", face = "bold", size = 11))
 ```
 
 
