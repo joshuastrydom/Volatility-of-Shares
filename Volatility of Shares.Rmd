@@ -487,6 +487,60 @@ finplot(plotreturn, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pc
 #finplot(rolling_small1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
 
+```{r ret compare, include=FALSE}
+return_density <- full_return[,-4] |>
+    spread(Index, Return)
+return_density_large <- ggplot(return_density[-c(1:84),c(1,2)], aes(x = Large_Cap)) +
+    geom_density(color = "darkred", fill = "red") +
+    geom_vline(aes(xintercept = mean(Large_Cap)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+
+return_density_mid <- ggplot(return_density[-c(1:84),c(1,3)], aes(x = Mid_Cap)) +
+    geom_density(color = "darkblue", fill = "lightblue") +
+    geom_vline(aes(xintercept = mean(Mid_Cap)), 
+             linetype = "dashed", size = 0.6, na.rm = FALSE) +
+    coord_flip() +
+    scale_x_continuous(limits = c(-0.04, 0.03), labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+
+return_density_small <- ggplot(return_density[-c(1:84),c(1,4)], aes(x = Small_Cap)) +
+    geom_density(color = "darkgreen", fill = "lightgreen") +
+    geom_vline(aes(xintercept = mean(Small_Cap)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+```
+
+```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling 12-Month Returns Comparison (past 10 Years) \\label{Figure8}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+retplot <- ggarrange(return_density_large, return_density_mid, return_density_small + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), align = "h", common.legend = TRUE,
+          ncol = 3, nrow = 1)
+annotate_figure(retplot, top = text_grob("Rolling 12-Month Return Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 20))
+```
+
 # Rolling Standard deviation  \label{Standard deviation}
 
 ```{r Join, include=FALSE}
@@ -542,11 +596,78 @@ full_SD <- roll_SD(l_caps, m_caps, s_caps) |>
     fmx_cols()
 ```
 
-```{r Figure8, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure8}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure9}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
 finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, 
     y.pct = T, y.pct_acc = 1)
 #finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
+
+```{r sd compare, include=FALSE}
+vol_returns <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    rename(Large_Cap = large_dailyreturn) |> 
+    rename(Mid_Cap = mid_dailyreturn) |> 
+    rename(Small_Cap = small_dailyreturn) |> 
+    gather(Index, SD, -date) |> 
+    arrange(date) |> 
+    filter(!is.na(SD)) |> 
+    mutate(YM = format(date, "%Y%B")) |> 
+    arrange(date) |> 
+    group_by(Index, YM) |> 
+    filter(date == last(date))
+SD <- roll_SD(l_caps, m_caps, s_caps) |> 
+    arrange(date) |> 
+    filter(!is.na(SD)) |> 
+    mutate(YM = format(date, "%Y%B")) |> 
+    arrange(date) |> 
+    group_by(Index, YM) |> 
+    filter(date == last(date))
+SD_density <- SD[,-4] |>
+    spread(Index, SD)
+
+sd_density_large <- ggplot(SD_density[-c(1:83),c(1,2)], aes(x = Large_Cap)) +
+    geom_density(color = "darkred", fill = "red") +
+    geom_vline(aes(xintercept = mean(Large_Cap)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+
+sd_density_mid <- ggplot(SD_density[-c(1:83),c(1,3)], aes(x = Mid_Cap)) +
+    geom_density(color = "darkblue", fill = "lightblue") +
+    geom_vline(aes(xintercept = mean(Mid_Cap)), 
+             linetype = "dashed", size = 0.6, na.rm = FALSE) +
+    coord_flip() +
+    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+
+sd_density_small <- ggplot(SD_density[-c(1:83),c(1,4)], aes(x = Small_Cap)) +
+    geom_density(color = "darkgreen", fill = "lightgreen") +
+    geom_vline(aes(xintercept = mean(Small_Cap)), 
+             linetype = "dashed", size = 0.6) +
+    coord_flip() +
+    scale_x_continuous(labels = scales::percent_format(scale = 100)) +
+    theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+    theme(legend.position="none")
+```
+
 
 ```{r STD, include=FALSE}
 largevol <- StdDev(l_caps$Daily_return)
@@ -602,9 +723,9 @@ Figures \ref{Figure1}  and \ref{Figure2}
 
 ```{r vol,include=FALSE}
 vol_returns <- list(ljoin, mjoin, sjoin) |>
-    reduce(full_join, by='date') |> 
-    tbl_xts()
-VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
+    reduce(full_join, by='date') #|> 
+#    tbl_xts()
+#VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
 ```
 
 \begin{table}[h]
@@ -713,7 +834,7 @@ plot_smallcorr <- ggplot(small_corr1, aes(x = Correlation)) +
 #plot_smallcorr
 ```
 
-```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Correlation Comparison of the Indexes \\label{Figure9}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+```{r Figure10, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Correlation Comparison of the Indexes \\label{Figure10}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
 corrplot <- ggarrange(plot_largecorr, plot_midcorr, plot_smallcorr + rremove("x.text"), 
           labels = c("Large Cap", "Mid Cap", "Small Cap"),
           ncol = 3, nrow = 1)
