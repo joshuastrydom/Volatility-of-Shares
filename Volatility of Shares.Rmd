@@ -12,7 +12,7 @@ documentclass: "elsarticle"
 # You can move the details below around as you please.
 Thesis_FP: TRUE
 Entry1: "Analysing the volatility of large, mid and small cap shares in South Africa"
-Entry2: "\\textbf{Joshua Strydom}" # textbf for bold
+Entry2: "\\textbf{Joshua Strydom (20718284)}" # textbf for bold
 #Entry3: "A thesis submitted toward the degree of Doctor of Philosophy"
 Uni_Logo: Tex/Stellenbosch.jpeg # Place a logo in the indicated location (from your root, e.g. defaults to ~/Tex/Logo.png) and uncomment this line. Leave uncommented for no image
 Logo_width: 0.3 # If using a logo - use this to set width (size) of image
@@ -242,8 +242,9 @@ s_caps <- index(J202)
 
 # Introduction \label{Introduction}
 
-In general, small cap stocks tend to have higher volatility than large cap stocks, and mid cap stocks tend to fall in between the two in terms of volatility. This is because small cap companies typically have less established business models and less predictable revenue streams, which can lead to greater fluctuations in their stock prices. On the other hand, large cap companies tend to have more established business models and more predictable revenue streams, which can lead to less volatility in their stock prices. In R, one can use the package 'PerformanceAnalytics' to calculate the volatility of different indexes. 
+Generally one would think that small cap stocks represent companies that have less established business models and less predictable revenue streams. This might lead one to believe that the prices of such stocks fluctuate to a greater degree than a more established, larger company. This would result in a less predictable return profile and hence, greater risk. The aim of this paper is to asses whether small cap stocks have a higher or lower level of volatility than large and mid cap stocks in South Africa. 
 
+Three separate indexes (Large, Mid and Small) were established in order to conduct the analysis over the 2005 to 2022 period. The Global Financial Crisis (GFC) and the COVID-19 pandemic had obvious consequences for the three indexes. The objective was both to determine which of the indexes were most affected by these times of crisis as well as to determine which of the indexes recovered fastest. It is found that the composition and the degree of correlation of an index has profound consequences for the performance of the respective index. As will be divulged, the Small Cap Index generated the lowest level of volatility when compared to the Large Cap and Mid Cap Indexes. The Small Cap Index's returns, standard deviations and degree of correlation all contributed to the resultant observation. The low degree of correlation of the Small Cap Index allowed for it be be well-diversified and best suited to weather an economic crisis in South Africa. 
 
 ```{r Drawdowns, include=FALSE}
 daily_contri <- function(x){
@@ -376,8 +377,6 @@ sectors <- Alsi[,c(1,3,11)] |>
     na.omit() |> 
     spread(Sector, Sum)
 summary(sectors)
-
-StdDev(sectors$Industrials)
 ```
 
 Table \ref{tab:Mean} below provides a depiction of the mean of daily returns for each sector over the entire period. The calculation was based solely on a stocks (within a certain sector) return and did not account for any weighting within an index. The 'Industrials' sector clearly generates, on average, the highest mean returns by a large magnitude. The 'Financials' sector generated the second highest mean daily returns while the 'Property' and 'Resources' sectors trailed far behind. The natural goal of an index would be to optimise its return profile. This would involve choosing a group of stocks that generate high returns but are not correlated (or have a low correlation). Hedging against downside returns could even be considered as important as searching for upside returns. 
@@ -402,14 +401,14 @@ Table \ref{tab:Mean} below provides a depiction of the mean of daily returns for
 As can be seen in \ref{Figure4}, the large cap index has historically neglected the 'Property' sector and has been dominated mostly by the 'Industrial' and 'Resource' sectors. In earlier periods of the sample (2005 to 2012) 'Resources' dominated 'Industrials' but the opposite became true in later periods. The 'Financials' sector seems to have maintained a relatively constant weighting in the large cap index. 
 The weightings in the later portion of the period do not sum to one. This is the result of a few mid cap stocks being filtered out of the large cap index yet they formed part of the FTSE/JSE Top 40 Index.
 
-```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Large Cap index \\label{Figure4}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+```{r Figure4, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Large Cap index \\label{Figure4}", fig.height = 2.5, fig.width = 6, fig.ext = 'png'}
 #finplot(rolling_mid1, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 J200plot
 ```
 
 The 'Industrials' sector also dominated the weighting of the mid cap index. Figure \ref{Figure5} displays a consistent domination of the 'Industrials' sector for the index. The 'Financial' sector was assigned the second highest weighting in the latter portion of the period at hand, surpassing the early dominance of the 'Resources' and 'Property' sector. The mid cap index assigned a noticeably greater weight to the 'Property' sector and a lower weight to the 'Resources' sector when compared to the large cap index for the latter portion of the full period under analysis. 
 
-```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Mid Cap index \\label{Figure5}", fig.height = 3, fig.width = 6, fig.ext = 'png'}
+```{r Figure5, warning =  FALSE, fig.align = 'center', fig.cap = "Sector weights for Mid Cap index \\label{Figure5}", fig.height = 2.5, fig.width = 6, fig.ext = 'png'}
 #chart.Drawdown(daily_mid$Daily_return,main = "Drawdowns: Mid caps in J203", 
 #               col = "steelblue")
 J201plot
@@ -567,7 +566,7 @@ annotate_figure(retplot, top = text_grob("Rolling 12-Month Return Comparison (pa
 
 Both the Mid- and Small Cap indexes provide high potential upside returns. The horizontal lines running through each graph in Figure \ref{Figure8} represent the respective means of the rolling 12-month returns over the past 10 years. The Small Cap Index's mean return is significantly higher than both the Mid Cap Index and Large Cap Index mean returns. Although the Mid Cap Index mean return is below the 0-line, most returns are distributed above the 0-line. There is thus a higher likelihood for upside returns than downside ones. 
 
-The return distribution of the Small Cap Index, in particular, is significantly more skewed to positive returns than the other indexes. It provides the greatest potential for upside gains.
+The return distribution of the Small Cap Index, in particular, is significantly more skewed to positive returns than the other indexes. It thus provides the greatest potential for upside gains.
 
 # Rolling Standard deviation  \label{Standard deviation}
 
@@ -624,11 +623,13 @@ full_SD <- roll_SD(l_caps, m_caps, s_caps) |>
     fmx_cols()
 ```
 
-```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure9}", fig.height = 5, fig.width = 6, fig.ext = 'png'}
+```{r Figure9, warning =  FALSE, fig.align = 'center', fig.cap = "Rolling Annualised Standard Deviation of the Indexes \\label{Figure9}", fig.height = 4.5, fig.width = 6, fig.ext = 'png'}
 finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, 
     y.pct = T, y.pct_acc = 1)
 #finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
+
+Standard deviation in this analysis is a used as a measure of risk. Returns for each index are annualised so that standard deviation can be compared over different time periods. It is apparent from Figure \ref{Figure9} that between 2005 and 2015 the Large Cap Index is on average epitomised by a larger standard deviation than the Small Cap Index. It should now be of no surprise that the standard deviation of the Large Cap Index spikes, as a result of the GFC, in 2009 more than that of the Small Cap Index. The standard deviation of all indexes spike in 2016 and halfway through 2020. The spike in the Small Cap Index, however, exceeds the standard deviation spikes of both the Large Cap and Mid Cap indexes during these time stamps. Following the 2020 spike, the Small Cap Index quickly reverts back to pre-pandemic levels of standard deviation while the Mid Cap and Large Cap Indexes take a little longer to revert back. By the end of the period of analysis, the standard deviations of the three indexes are reasonably close together with the Small Cap Index having the lowest and the Large Cap Index having the highest. 
 
 ```{r sd compare, include=FALSE}
 roll_SD_1 <- function(x,y,z,d){
@@ -748,7 +749,9 @@ annotate_figure(sdplot, top = text_grob("Rolling 12-Month Risk Comparison (past 
                color = "black", face = "bold", size = 11))
 ```
 
-In addition to providing us with increased diversification, the Mid- and Small-caps included in the CAPI also give us high potential upside returns.
+The high potential for upside returns in the Small Cap Index does not necessarily come at a higher portfolio risk. The distribution of materialized risk over time shows that the Small Cap Index delivered lower aggregate volatility on the whole. The stability of the index can be attributed to the lower relative international exposure compared to both the Large and Mid Cap Indexes. 
+
+The Mid Cap Index seems to have delivered the highest aggregate volatility on the whole. This result is likely to have been influenced by the lack of data. Although the Large Cap Index's distribution of materialized risk over time is concentrated between the 2% and 3% regions, its mean standard deviation is roughly equal to the mean standard deviation of the Mid Cap Index. 
 
 ```{r STD, include=FALSE}
 largevol <- StdDev(l_caps$Daily_return)
@@ -776,7 +779,7 @@ cat("Small volatility: ", smallvol)
 \end{center}
 \end{table}
 
-Figures \ref{Figure1}  and \ref{Figure2}
+Table \ref{tab:SD} displays the overall standard deviation for each index over their respective sample periods. The Large Cap Index is associated with the highest standard deviation and as such, the highest level of risk. 
 
 
 <!-- :::::: {.columns data-latex="[T]"} -->
@@ -823,7 +826,7 @@ vol_returns <- list(ljoin, mjoin, sjoin) |>
 \end{center}
 \end{table}
 
-The upside/downside ratio is often used to gauge overbought and oversold conditions in the market. Low values can indicate that the market is reaching oversold levels, while high values can indicate that the market is becoming overbought.
+Table \ref{tab:VS} displays a measure of volatility skewness. It is a ratio of upside variance to downside variance.
 
 # Correlation \label{Correlation}
 
@@ -926,14 +929,19 @@ annotate_figure(corrplot, top = text_grob("Rolling 12-Month Correlation Comparis
                color = "black", face = "bold", size = 11))
 ```
 
+Figure \ref{Figure11} shows the degree to which stocks within each of the Large, Mid and Small Cap indexes are correlated. The correlations are measured on a rolling 12-month basis, with the distributions showing the extent to which correlation varies in each.
 
-\hfill
+Within the Mid and Small Cap Indexes, individual correlations are lower. So, in addition to the high potential upside returns and lower associated risk, the Small Cap Index also provides increased diversification. Although the Mid Cap Index could be regarded as relatively risky, it is more diversified than the Large Cap Index. This associated risk thus has to be derived from somewhere other than correlation between individual stocks within the portfolio. 
+
+The Large Cap Index has the highest degree of correlation between its constituent stocks. The Large Cap Index is dominated by stocks that have a high degree of international exposure. Changes in global conditions and economic activity affect these stocks directly and thus leads to a higher level of correlation. A high degree of correlation negatively impacts any chances of diversification. 
 
 <!-- hfill can be used to create a space, like here between text and table. -->
 
 # Conclusion \label{Conclusion}
 
-I hope you find this template useful. Remember, stackoverflow is your friend - use it to find answers to questions. Feel free to write me a mail if you have any questions regarding the use of this package. To cite this package, simply type citation("Texevier") in Rstudio to get the citation for @Texevier (Note that uncited references in your bibtex file will not be included in References).
+The aim of this paper was to compare the differing levels of volatility in large, mid and small cap stocks. The Small Cap Index was not immune to the consequences of the GFC of 2007/2008 but was not nearly as adversely affected when compared to the Large Cap Index. The high degree of international exposure and hence, high degree of correlation did not allow for the Large Cap Index to be sufficiently diversified  to combat the effects of the GFC. The pandemic of 2020/2021 had a more all-encompassing consequence for stocks as a whole in South Africa. The consequences were not isolated to a few sectors of the economy but rather they adversely impacted most. The lower degree of correlation of both the Small and Mid Cap Indexes assisted these indexes during this time. The composition of the Mid Cap Index did not, however, do the annualised return of the index any favours. The Large Cap Index was better composed and so bounced back better than the Mid Cap Index. 
+
+The Small Cap Index has the greatest potential for upside returns, has the lowest associated risk and has the lowest degree of correlation. The return profile of the index was thus able to be optimised via diversification. It can thus to said with confidence that the Small Cap Index is the most stable in South Africa. 
 
 <!-- Make title of bibliography here: -->
 <!-- \newpage -->
