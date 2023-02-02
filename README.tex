@@ -1,0 +1,595 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\hypertarget{volatility-of-shares}{%
+\section{Volatility-of-Shares}\label{volatility-of-shares}}
+
+This README is here to describe my analysis with the accompanying code.
+The aim of the paper is to compare of the volatility of returns for
+large, mid and small cap shares in South Africa. The analysis will be
+conducted using many packages, with particular use of the
+PerformanceAnalytics package. Indexes for Large Cap, Mid Cap and Small
+Cap shares will be created by calculating the product of each
+constituent shares return and its weight in the respective index.
+Return, standard deviation and correlation calculations will be used to
+compare the indexes.
+
+\hypertarget{packages}{%
+\section{Packages}\label{packages}}
+
+\texttt{\{r\ setup,\ include=FALSE\}\ if(!require("tidyverse"))\ install.packages("tidyverse")\ library(tidyverse)\ if(!require("tidyverse"))\ install.packages("tidyverse")\ library(tidyverse)\ library(quantmod)\ library(ggplot2)\ library(dplyr)\ library(tidyverse)\ library(fmxdat)\ library(data.table)\ library(tbl2xts)\ library(tidyr)\ library(PerformanceAnalytics)\ library(rvest)\ library(corrplot)\ library(ggpubr)}
+\# Load the data
+\texttt{\{r\ Load\ data\}\ Alsi\ \textless{}-\ readRDS("data/Alsi\_Returns.rds")\ Alsi\ \textless{}-\ as.data.frame(Alsi)}
+\# Create functions
+
+```\{r Functions\} \#Create functions that create the data frames for
+each size contribution \textless- function(x) \{ index1 \textless-
+x{[},c(1:3,7){]} \textbar\textgreater{} mutate(Contribution = Return *
+J203) \#All share index index1{[}is.na(index1){]} = 0 wide\_index1
+\textless- spread(index1{[},c(1:2,5){]}, Tickers, Contribution)
+wide\_index1{[}is.na(wide\_index1){]} = 0 daily\_contribution \textless-
+wide\_index1 \textbar\textgreater{} mutate(Daily\_return =
+select(wide\_index1, 2:ncol(wide\_index1)) \textbar\textgreater{}
+rowSums(na.rm = TRUE)) \#Sum of daily returns of each stock for index
+first \textless- daily\_contribution{[},1{]} last \textless-
+daily\_contribution{[},ncol(daily\_contribution){]} Total \textless-
+data.frame(first,last) colnames(Total){[}1{]} \textless- ``date''
+colnames(Total){[}2{]} \textless- ``Daily\_return'' return(Total) \}
+\#Use output for rolling and daily functions
+
+contributionmid \textless- function(x) \{ index1 \textless-
+x{[},c(1:3,9){]} \textbar\textgreater{} mutate(Contribution = Return *
+J201) \#Mid cap index index1{[}is.na(index1){]} = 0 wide\_index1
+\textless- spread(index1{[},c(1:2,5){]}, Tickers, Contribution)
+wide\_index1{[}is.na(wide\_index1){]} = 0 daily\_contribution \textless-
+wide\_index1 \textbar\textgreater{} mutate(J201Daily\_return =
+select(wide\_index1, 2:ncol(wide\_index1)) \textbar\textgreater{}
+rowSums(na.rm = TRUE)) \#Sum of daily returns of each stock for index
+Total \textless- daily\_contribution{[},c(1,177){]} return(Total) \}
+\#Use output for rolling and daily functions
+
+contributionsmall \textless- function(x) \{ index1 \textless-
+x{[},c(1:3,10){]} \textbar\textgreater{} mutate(Contribution = Return *
+J202) \#Small cap index index1{[}is.na(index1){]} = 0 wide\_index1
+\textless- spread(index1{[},c(1:2,5){]}, Tickers, Contribution)
+wide\_index1{[}is.na(wide\_index1){]} = 0 daily\_contribution \textless-
+wide\_index1 \textbar\textgreater{} mutate(J202Daily\_return =
+select(wide\_index1, 2:ncol(wide\_index1)) \textbar\textgreater{}
+rowSums(na.rm = TRUE)) \#Sum of daily returns of each stock for index
+Total \textless- daily\_contribution{[},c(1,225){]} return(Total) \}
+\#Use output for rolling and daily functions
+
+daily\_contri \textless- function(x)\{ daily \textless- x
+\textbar\textgreater{} mutate(Cum\_Ret = cumprod(1 + Daily\_return)) xts
+\textless- tbl\_xts(daily\_contri\_large1) return(xts) \}
+
+rolling\_contri \textless- function(x)\{ rolling \textless- x
+\textbar\textgreater{} gather(Ticker, Contribution, -date)
+\textbar\textgreater{} group\_by(Ticker) xts \textless- tbl\_xts(tblData
+= rolling, cols\_to\_xts = Contribution, spread\_by = Ticker)
+return(xts) \}
+
+rolling\_SDcum \textless- function(x)\{ rolling \textless- x
+\textbar\textgreater{} \#Use large\_caps, mid\_caps or small\_caps
+mutate(YM = format(date, ``\%Y\%B'')) \textbar\textgreater{}
+arrange(date) \textbar\textgreater{} group\_by(Tickers, YM)
+\textbar\textgreater{} filter(date == last(date)) \textbar\textgreater{}
+group\_by(Tickers) \textbar\textgreater{} select(date, Tickers, Return)
+\textbar\textgreater{} mutate(RollSD = RcppRoll::roll\_sd(1 + Return,
+36, fill = NA, align = ``right'') * sqrt(12)) \textbar\textgreater{}
+filter(!is.na(RollSD)) return(rolling) \}
+
+\begin{verbatim}
+# Dataframe creation 
+
+The following code chunk was used to find the daily returns for each index given the constituent shares' respective weight in each appropriate index. Large Cap shares are part of the J200, Mid Cap shares are part of the J201 and Small Cap shares are part of the J202. 
+
+```{r Dataframes}
+# Wrote function to find daily returns for each index given the constituent shares. 
+index <- function(x){
+    index <- x
+    index <- index[,-c(5:10)]
+    index$Tickers <- gsub(" SJ|Equity","", index$Tickers)
+    wide <- spread(index[,c(1,2,7)], Tickers, Contribution)
+    Total <- wide |> 
+      mutate(Contribution = select(wide, 2:ncol(wide)) |> rowSums(na.rm = TRUE)) #Sum of daily returns of all stocks of the index
+    first <- Total[,1] #Kept the date column
+    last <- Total[,ncol(Total)] #Kept the contribution column which ended last due to the mutate
+    Final <- data.frame(first,last) #Merged the dateframes
+    colnames(Final)[1] <- "date"
+    colnames(Final)[2] <- "Daily_return"
+    Cum <- Final |> 
+        mutate(Cumulative_returns = cumprod(1 + Daily_return)) |>#Get cumulative returns for the index
+        filter(Daily_return != 0) #Filtered out rows that did not contribute. 
+    return(Cum)
+}
+J200 <- Alsi |> 
+    filter(Index_Name == "Large_Caps") |> 
+    mutate(Contribution = Return*J200)
+l_caps <- index(J200) #Large Cap Index
+
+J201 <- Alsi |> 
+    filter(Index_Name == "Mid_Caps") |> 
+    mutate(Contribution = Return*J201)
+m_caps <- index(J201) #Mid Cap Index
+J202 <- Alsi |> 
+    filter(Index_Name == "Small_Caps") |> 
+    mutate(Contribution = Return*J202)
+s_caps <- index(J202) #Small Cap Index
+\end{verbatim}
+
+\hypertarget{index-analysis}{%
+\section{Index Analysis}\label{index-analysis}}
+
+The analysis of volatility is based on three indexes of the Johannesburg
+Securities Exchange (JSE). Data is attained by filtering out the FTSE
+All Share Index (ALSI). The large cap index is based on the FTSE/JSE Top
+40 Index (J200), the mid cap index is based on the FTSE/JSE Mid Cap
+Index (J201) and the small cap index is based on the FTSE/JSE Small Cap
+Index (J202). The derived returns for each of the separate indexes are
+calculated as the product of a stocks daily return and the assigned
+weight in the respective index. For the large and small cap indexes,
+data from 2005 to 2022 is available. Unfortunately for the mid cap
+index, data is only available from 2016 onward.
+
+\hypertarget{drawdown-calculations}{%
+\subsection{Drawdown calculations}\label{drawdown-calculations}}
+
+\texttt{\{r\ Drawdowns\}\ \#Had\ to\ convert\ the\ previously\ composed\ indexes\ into\ an\ xts\ format\ daily\_contri\ \textless{}-\ function(x)\{\ \ \ \ \ xts\ \textless{}-\ tbl\_xts(x)\ \ \ \ \ return(xts)\ \}\ \#Created\ spearte\ dataframes\ for\ each\ index\ drawdown\_large\ \textless{}-\ daily\_contri(l\_caps)\ drawdown\_mid\ \textless{}-\ daily\_contri(m\_caps)\ drawdown\_small\ \textless{}-\ daily\_contri(s\_caps)}
+Below is the Large Cap Index drawdown graph.
+\texttt{\{r\ Figure1\}\ chart.Drawdown(drawdown\_large\$Daily\_return,main\ =\ "Drawdowns:\ Large\ Caps",\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ "steelblue")}
+Below is the Mid Cap Index drawdown graph.
+\texttt{\{r\ Figure2\}\ chart.Drawdown(drawdown\_mid\$Daily\_return,main\ =\ "Drawdowns:\ Mid\ Caps",\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ "steelblue")}
+Below is the Small Cap Index drawdown graph.
+\texttt{\{r\ Figure3\}\ chart.Drawdown(drawdown\_small\$Daily\_return,main\ =\ "Drawdowns:\ Small\ Caps",\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ "steelblue")}
+\#\# Sector weightings
+
+Sector weightings calculations were used to identify and anaylse the
+impct of index composition on the return profile, standard deviation and
+degree of correlation in the index.
+
+\texttt{\{r\ Weightings,\ include=FALSE\}\ \#Calcualtions\ for\ the\ weight\ comparision\ chart\ for\ sectors\ of\ each\ index.\ New\ dataframes\ were\ created\ so\ that\ the\ accompanying\ function\ could\ operate\ effectively.\ \ J200sectors\ \textless{}-\ J200{[},c(1,11,8){]}\ \textbar{}\textgreater{}\ \ \ \ \ \ group\_by(Sector)\ \textbar{}\textgreater{}\ \ \ \ \ \ rename(Weight\ =\ J200)\ J201sectors\ \textless{}-\ J201{[},c(1,11,9){]}\ \textbar{}\textgreater{}\ \ \ \ \ \ group\_by(Sector)\ \textbar{}\textgreater{}\ \ \ \ \ \ rename(Weight\ =\ J201)\ J202sectors\ \textless{}-\ J202{[},c(1,11,10){]}\ \textbar{}\textgreater{}\ \ \ \ \ \ group\_by(Sector)\ \textbar{}\textgreater{}\ \ \ \ \ \ rename(Weight\ =\ J202)\ \#Created\ a\ function\ to\ return\ the\ data\ used\ to\ construct\ the\ sector\ weightings\ within\ each\ index.\ \ \ \ \ \ sector\ \textless{}-\ function(x)\{\ \ \ \ \ names\ =\ c("Financials","Industrials","Resources","Property")\ \ \ \ \ filtered\ \textless{}-\ x\ \ \ \ \ weights\ \textless{}-\ aggregate(Weight\textasciitilde{}.,\ x,FUN=sum)\ \textbar{}\textgreater{}\ \ \ \ \ \ \ \ \ \ group\_by(date)\ \textbar{}\textgreater{}\ \ \ \ \ \ \ \ \ \ ggplot()\ +\ \ \ \ \ \ \ \ \ geom\_bar(aes(x=date,\ y=Weight,\ fill=factor(Sector,\ names)),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stat\ =\ \textquotesingle{}identity\textquotesingle{},\ width\ =\ 1)\ +\ \ \ \ \ \ \ \ \ scale\_y\_continuous(labels\ =\ scales::percent\_format(scale\ =\ 100))\ +\ \ \ \ \ \ \ \ \ labs(x\ =\ NULL,\ y\ =\ NULL,\ title\ =\ "Sector\ Weighting",\ fill\ =\ "Sector")\ +\ \ \ \ \ \ \ \ \ theme\_bw()\ +\ \ \ \ \ \ \ \ \ theme(legend.position="bottom")\ \ \ \ \ \ \ \ \ return(weights)\ \}\ J200plot\ \textless{}-\ sector(J200sectors)\ \#Large\ Cap\ Index\ J201plot\ \textless{}-\ sector(J201sectors)\ \#Mid\ Cap\ Index\ J202plot\ \textless{}-\ sector(J202sectors)\ \#Small\ Cap\ Index}
+The following code chunk was used to determine the mean return for each
+sector irrespective of their weight in any index.
+\texttt{\{r\ sectors,\ include=FALSE\}\ sectors\ \textless{}-\ Alsi{[},c(1,3,11){]}\ \textbar{}\textgreater{}\ \ \ \ \ \ group\_by(date,\ Sector)\ \textbar{}\textgreater{}\ \ \ \ \ \ summarise(Sum\ =\ sum(Return))\ \textbar{}\textgreater{}\ \ \ \ \ \ ungroup()\ \textbar{}\textgreater{}\ \ \ \ \ \ filter(!is.na(Sector))\ \textbar{}\textgreater{}\ \ \ \ \ \ na.omit()\ \textbar{}\textgreater{}\ \ \ \ \ \ spread(Sector,\ Sum)\ summary(sectors)}
+The results of the mean return calcualtion were manually tabulated as
+follows:
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+        Sector & Mean \\
+        \hline
+        Financials & 0.16530 \\
+        Industrials & 1.342 \\
+        Property & 0.009539 \\
+        Resources & 0.07961 \\
+        \hline
+    \end{tabular}
+    \caption{Mean daily returns}
+    \label{tab:Mean}
+\end{center}
+\end{table}
+
+Now, the weighting plots are displayed in order to analyse each separate
+index in detail. \texttt{\{r\ Figure4\}\ J200plot}
+\texttt{\{r\ Figure5\}\ J201plot} \texttt{\{r\ Figure6\}\ J202plot} \#
+Annualised returns
+
+At first, the rolling annualised returns of the indexes were calculated
+using various functions. The resultant dataframes produced by the
+functions were used to plot the rolling annualised return graph.
+
+```\{r Annual returns\} \#Rolling annualised returns of indices
+roll\_annualreturn \textless- function(x,y,z)\{ large \textless-
+x{[},-c(3){]} colnames(large){[}2{]} \textless- ``Large\_Cap'' mid
+\textless- y{[},-c(3){]} colnames(mid){[}2{]} \textless- ``Mid\_Cap''
+small \textless- z{[},-c(3){]} colnames(small){[}2{]} \textless-
+``Small\_Cap'' joined \textless- list(large,mid,small)
+\textbar\textgreater{} reduce(full\_join, by=`date')
+\textbar\textgreater{} gather(Index, Return, -date)
+\textbar\textgreater{} arrange(date) \textbar\textgreater{}
+filter(!is.na(Return)) \textbar\textgreater{} mutate(YM = format(date,
+``\%Y\%B'')) \textbar\textgreater{} arrange(date) \textbar\textgreater{}
+group\_by(Index, YM) \textbar\textgreater{} filter(date == last(date))
+return(joined) \} \#Joined the separate datasets crated. full\_return
+\textless- roll\_annualreturn(l\_caps, m\_caps, s\_caps) plotreturn
+\textless- full\_return \textbar\textgreater{} group\_by(Index)
+\textbar\textgreater{} mutate(RollRets = RcppRoll::roll\_prod(1 +
+Return, 36, fill = NA, align = ``right'')\^{}(12/36) - 1)
+\textbar\textgreater{} group\_by(date) \textbar\textgreater{}
+filter(any(!is.na(RollRets))) \textbar\textgreater{} ungroup()
+\textbar\textgreater{} ggplot() + geom\_line(aes(date, RollRets, color =
+Index), alpha = 0.7, size = 1.25) + labs(title = ``Rolling 3 Year
+Annualized Returns with differing start dates'', subtitle = ``Large, Mid
+and Small cap Indexes'', x = ````, y =''Rolling 3 year Returns (Ann.)``,
+caption =''Note:\nDistortions are not evident now.'') +
+theme\_fmx(title.size = ggpts(30), subtitle.size = ggpts(20),
+caption.size = ggpts(25), CustomCaption = T) + fmx\_cols()
+
+\begin{verbatim}
+I then plotted the joined dataset of the annualised returns for the three separate indexes. 
+
+```{r Figure7}
+finplot(plotreturn, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
+\end{verbatim}
+
+A density plot of the distribution of annualised returns seemed
+necessary. The code used to create such a plot follows below. ```\{r ret
+compare\} b \textless- full\_return \textbar\textgreater{}
+group\_by(Index) \textbar\textgreater{} mutate(RollRets =
+RcppRoll::roll\_prod(1 + Return, 12, fill = NA, align =
+``right'')\^{}(12/12) - 1) \textbar\textgreater{} \#Annualised rolling
+returns group\_by(date) \textbar\textgreater{}
+filter(any(!is.na(RollRets))) \textbar\textgreater{} ungroup()
+
+\hypertarget{c-is-used-as-the-input-for-each-of-the-density-plots.}{%
+\section{c is used as the input for each of the density
+plots.}\label{c-is-used-as-the-input-for-each-of-the-density-plots.}}
+
+c \textless- b{[}-c(1:146),-c(3,4){]} \textbar\textgreater{} \#Filtered
+out for the past 10 years and got rid of unnecessary columns
+spread(Index, RollRets) return\_density \textless- full\_return{[},-4{]}
+\textbar\textgreater{} spread(Index, Return) \#Large Cap Index density
+plot return\_density\_large \textless- ggplot(c{[},c(1,2){]}, aes(x =
+Large\_Cap)) + geom\_density(color = ``darkred'', fill = ``red'') +
+geom\_vline(aes(xintercept = mean(Large\_Cap)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(-0.05,
+0.1), labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Mid Cap Index density plot mid\_density \textless- c{[},c(1,3){]}
+\textbar\textgreater{} na.omit() \#Had to omit NAs for the geom\_vline
+to function. return\_density\_mid \textless- ggplot(mid\_density, aes(x
+= Mid\_Cap)) + geom\_density(color = ``darkblue'', fill = ``lightblue'')
++ geom\_vline(aes(xintercept = mean(Mid\_Cap)), linetype = ``dashed'',
+size = 0.6, na.rm = FALSE) + coord\_flip() + scale\_x\_continuous(limits
+= c(-0.05, 0.1), labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Small Cap Index density plot return\_density\_small \textless-
+ggplot(c{[},c(1,4){]}, aes(x = Small\_Cap)) + geom\_density(color =
+``darkgreen'', fill = ``lightgreen'') + geom\_vline(aes(xintercept =
+mean(Small\_Cap)), linetype = ``dashed'', size = 0.6) + coord\_flip() +
+scale\_x\_continuous(limits = c(-0.05, 0.1), labels =
+scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\begin{verbatim}
+I used ggarange to combine the density plots. 
+```{r Figure8}
+retplot <- ggarrange(return_density_large, return_density_mid, return_density_small + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), align = "h", common.legend = TRUE, font.label = list(size = 10, color = "black"),
+          ncol = 3, nrow = 1)
+annotate_figure(retplot, top = text_grob("Rolling 12-Month Return Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 11))
+\end{verbatim}
+
+\hypertarget{rolling-standard-deviation}{%
+\section{Rolling Standard deviation}\label{rolling-standard-deviation}}
+
+The rolling standard deviation calculations follow. The RcppRoll
+function was employed to determine the rolling standard deviations.
+
+```\{r Join\} \#Filter out the necessary columns of the respective
+indexes ljoin \textless- l\_caps{[},c(1,2){]} colnames(ljoin){[}2{]}
+\textless- ``large\_dailyreturn'' mjoin \textless- m\_caps{[},c(1,2){]}
+colnames(mjoin){[}2{]} \textless- ``mid\_dailyreturn'' sjoin \textless-
+s\_caps{[},c(1,2){]} colnames(sjoin){[}2{]} \textless-
+``small\_dailyreturn''
+
+\#Wrote a function to calculate the rolling stanard deviations roll\_SD
+\textless- function(x,y,z)\{ large \textless- x \textbar\textgreater{}
+mutate(Large\_Cap = RcppRoll::roll\_sd(1 + Daily\_return, 36, fill = NA,
+align = ``right'') * sqrt(12)) \textbar\textgreater{}
+filter(!is.na(Large\_Cap)) l \textless- large{[},c(1,4){]} mid
+\textless- y \textbar\textgreater{} mutate(Mid\_Cap =
+RcppRoll::roll\_sd(1 + Daily\_return, 36, fill = NA, align = ``right'')
+* sqrt(12)) \textbar\textgreater{} filter(!is.na(Mid\_Cap)) m \textless-
+mid{[},c(1,4){]} small \textless- z \textbar\textgreater{}
+mutate(Small\_Cap = RcppRoll::roll\_sd(1 + Daily\_return, 36, fill = NA,
+align = ``right'') * sqrt(12)) \textbar\textgreater{}
+filter(!is.na(Small\_Cap)) s \textless- small{[},c(1,4){]} joined
+\textless- list(l,m,s) \textbar\textgreater{} reduce(full\_join,
+by=`date') \textbar\textgreater{} gather(Index, SD, -date)
+\textbar\textgreater{} arrange(date) return(joined) \}
+
+\#Used the function to create a graph of the rolling standard
+deviations. full\_SD \textless- roll\_SD(l\_caps, m\_caps, s\_caps)
+\textbar\textgreater{} ggplot() + geom\_line(aes(x = date, y = SD, color
+= Index), alpha = 0.7, size = 1) + labs(title = ``Rolling 3 Year
+Annualized SD with differing starting dates'', subtitle = ``Large, Mid
+and Small cap Indexes'', x = ````, y =''Rolling 3 year Returns (Ann.)``,
+caption =''Note:\nDistortions are not evident now.'') +
+theme\_fmx(title.size = ggpts(30), subtitle.size = ggpts(20),
+caption.size = ggpts(25), CustomCaption = T) +
+scale\_y\_continuous(labels = scales::percent\_format(scale = 100)) +
+theme(legend.position = ``bottom'') + fmx\_cols()
+
+\begin{verbatim}
+I then used the resulting dataframes/gg dataset to plot the results. 
+
+```{r Figure9}
+finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, 
+    y.pct = T, y.pct_acc = 1)
+\end{verbatim}
+
+Now, I needed to data for the rolling 12 month standard deviation of
+each index. This data would eventually be used to plot density graphs.
+
+```\{r SD compare\} \#Rolling 12-month standard deviation for the
+indexes full \textless- full\_return \textbar\textgreater{}
+group\_by(Index) \textbar\textgreater{} select(date, Index, Return)
+\textbar\textgreater{} mutate(RollSD = RcppRoll::roll\_sd(1 + Return,
+12, fill = NA, align = ``right'') * sqrt(12)) \textbar\textgreater{}
+filter(!is.na(RollSD))
+
+\#Filter out columns that are not necessary. SD\_density \textless-
+full{[},-3{]} \textbar\textgreater{} spread(Index, RollSD)
+
+\#Create density plot for the Large Cap Index sd\_density\_large
+\textless- ggplot(SD\_density{[}-c(1:73),c(1,2){]}, aes(x = Large\_Cap))
++ geom\_density(color = ``darkred'', fill = ``red'') +
+geom\_vline(aes(xintercept = mean(Large\_Cap)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(0.01,
+0.04),labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Create density plot for the Mid Cap Index sd\_mid \textless-
+SD\_density{[},c(1,3){]} \textbar\textgreater{} na.omit()
+sd\_density\_mid \textless- ggplot(sd\_mid, aes(x = Mid\_Cap)) +
+geom\_density(color = ``darkblue'', fill = ``lightblue'') +
+geom\_vline(aes(xintercept = mean(Mid\_Cap)), linetype = ``dashed'',
+size = 0.6, na.rm = FALSE) + coord\_flip() + scale\_x\_continuous(limits
+= c(0.01, 0.04), labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Create density plot for the Small Cap Index sd\_density\_small
+\textless- ggplot(SD\_density{[}-c(1:73),c(1,4){]}, aes(x = Small\_Cap))
++ geom\_density(color = ``darkgreen'', fill = ``lightgreen'') +
+geom\_vline(aes(xintercept = mean(Small\_Cap)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(0.01,
+0.04), labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\begin{verbatim}
+I used ggarrange to combine the respective ggplots for a nice figure to be used in the paper. 
+
+```{r Figure10}
+sdplot <- ggarrange(sd_density_large, sd_density_mid, sd_density_small + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), font.label = list(size = 10, color = "black"),
+          ncol = 3, nrow = 1)
+annotate_figure(sdplot, top = text_grob("Rolling 12-Month Risk Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 11))
+\end{verbatim}
+
+The `average' volatility for each index was then calculated to compare
+to the rolling standard deviation calculation.
+
+```\{r STD\} largevol \textless-
+StdDev(l\_caps\(Daily_return) midvol <- StdDev(m_caps\)Daily\_return)
+smallvol \textless- StdDev(s\_caps\$Daily\_return)
+
+cat(``Large volatility:'', largevol, ``\n'') cat(``Mid volatility:'',
+midvol, ``\n'') cat(``Small volatility:'', smallvol)
+
+\begin{verbatim}
+The results were manually tabulated as follows. 
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+         & Standard deviation \\
+        \hline
+        Large cap & 0.01298498 \\
+        Mid cap & 0.01039368 \\
+        Small cap & 0.00801369 \\
+        \hline
+    \end{tabular}
+    \caption{Standard deviation}
+    \label{tab:SD}
+\end{center}
+\end{table}
+
+Now, the volatility skewness of each index was calculated. This is a ratio of upside variance to downside variance. 
+
+```{r vol}
+vol_returns <- list(ljoin, mjoin, sjoin) |>
+    reduce(full_join, by='date') |> 
+    tbl_xts()
+VolatilitySkewness(vol_returns, MAR = 0, stat = c("volatility"))
+\end{verbatim}
+
+The results were again manually tabulated.
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| c | c | c | c |}
+    \hline
+         & Large cap & Mid cap & Small cap \\
+        \hline
+        Volatility skewness & 1.069731 & 0.9739739 & 1.379238 \\
+        \hline
+    \end{tabular}
+    \caption{Volatility skewness}
+    \label{tab:VS}
+\end{center}
+\end{table}
+
+\hypertarget{correlation}{%
+\section{Correlation}\label{correlation}}
+
+The correlation calculation was rather involved. I first created an
+index to determine the degree of correlation between all stocks within
+each respective index. After those datafiles were obtained, separate
+density plots were produced using ggplot2. The resulting graphs were
+then combined and were used in the paper.
+
+```\{r Correlation\} \#Function to determine the correlation between
+constituent shares within each index. correlationreturn \textless-
+function(x)\{ index \textless- x index \textless- index{[},-c(5:10){]}
+index\(Tickers <- gsub(" SJ|Equity","", index\)Tickers) Total \textless-
+index \textbar\textgreater{} mutate(Contribution =
+coalesce(Contribution, 0)) \textbar\textgreater{} group\_by(Tickers)
+\textbar\textgreater{} mutate(Cumulative\_contribution = cumprod(1 +
+Contribution)) Final \textless- Total{[},c(1,2,3){]} wide \textless-
+spread(Final, Tickers, Return) wide1 \textless- as.data.frame(wide)
+wide2 \textless- wide1{[}-c(1:1750),{]} \#wide1{[}is.na(wide1){]} = 0
+\#Made NAs equal to zero so that rowSums function would work xts
+\textless- wide2{[},c(2:86){]} \textbar\textgreater{} xts(order.by =
+as.Date(wide2{[} , 1{]}, ``\%Y-\%m-\%d'')) y \textless- rollapply(xts,
+width=365, cor, fill = NA, by.column=FALSE) paste\_ \textless-
+function(\ldots) paste(\ldots, sep = ``\emph{``) names\_mat \textless-
+do.call(''outer'', list(names(xts), names(xts), paste})) names(y)
+\textless- names\_mat
+\#y\(Average_correlation <- rowMeans(y, na.rm=TRUE)  e <- y |>  xts_tbl()  f <- rbind(e, sapply(e, function(x) if(is.numeric(x)) mean(x, na.rm = TRUE) else ""))  last <- f[nrow(f),]  long <- last |>  gather(Stocks, Correlation, -date)  long1 <- long[,-1]  long2 <- arrange(long1, Correlation)  long3 <- long2[!duplicated(long2\)Correlation),
+{]} long3\(Correlation <- as.numeric(as.character(long3\)Correlation))
+\#long4 \textless- long3{[}!is.nan(long3){]} \textbar\textgreater{} \#
+filter(long3\$Correlation != 1) \#long3 = as.numeric(long2{[},2{]})
+return(long3) \}
+
+\#Large Cap Index correalation dataframe large\_corr \textless-
+correlationreturn(J200) \#Large Cap Index density plot of correlations
+large\_corr1 \textless- large\_corr{[}-c(1493:1494),{]} plot\_largecorr
+\textless- ggplot(large\_corr1, aes(x = Correlation)) +
+geom\_density(color=``darkred'', fill=``red'') +
+geom\_vline(aes(xintercept = mean(Correlation)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(0, 0.5),
+labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Mid Cap Index correalation dataframe mid\_corr \textless-
+correlationreturn(J201) \#Mid Cap Index density plot of correlations
+mid\_corr1 \textless- mid\_corr{[}-c(1044:1045),{]} plot\_midcorr
+\textless- ggplot(mid\_corr1, aes(x = Correlation)) +
+geom\_density(color=``darkblue'', fill=``lightblue'') +
+geom\_vline(aes(xintercept = mean(Correlation)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(0, 0.5),
+labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\#Small Cap Index correalation dataframe small\_corr \textless-
+correlationreturn(J202) \#Small Cap Index density plot of correlations
+small\_corr1 \textless- small\_corr{[}-c(721:722),{]} plot\_smallcorr
+\textless- ggplot(small\_corr1, aes(x = Correlation)) +
+geom\_density(color=``darkgreen'', fill=``lightgreen'') +
+geom\_vline(aes(xintercept = mean(Correlation)), linetype = ``dashed'',
+size = 0.6) + coord\_flip() + scale\_x\_continuous(limits = c(0, 0.5),
+labels = scales::percent\_format(scale = 100)) +
+theme(axis.text.x=element\_blank(), axis.ticks.x=element\_blank(),
+axis.title.x = element\_blank(), axis.title.y = element\_blank(),
+panel.grid.major = element\_blank(), panel.grid.minor =
+element\_blank(), panel.background = element\_blank()) +
+theme(legend.position=``none'')
+
+\begin{verbatim}
+The graphs were combined and plotted. 
+
+```{r Figure11}
+corrplot <- ggarrange(plot_largecorr, plot_midcorr, plot_smallcorr + rremove("x.text"), 
+          labels = c("Large Cap", "Mid Cap", "Small Cap"), font.label = list(size = 10, color = "black"),
+          ncol = 3, nrow = 1)
+annotate_figure(corrplot, top = text_grob("Rolling 12-Month Correlation Comparison (past 10 Years)", 
+               color = "black", face = "bold", size = 11))
+\end{verbatim}
+
+\end{document}

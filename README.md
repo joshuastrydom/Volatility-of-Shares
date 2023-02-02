@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Volatility-of-Shares
 
 This README is here to describe my analysis with the accompanying code. The aim of the paper is to compare of the volatility of returns for large, mid and small cap shares in South Africa. The analysis will be conducted using many packages, with particular use of the PerformanceAnalytics package. Indexes for Large Cap, Mid Cap and Small Cap shares will be created by calculating the product of each constituent shares return and its weight in the respective index. Return, standard deviation and correlation calculations will be used to compare the indexes. 

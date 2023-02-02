@@ -244,7 +244,7 @@ s_caps <- index(J202)
 
 Generally one would think that small cap stocks represent companies that have less established business models and less predictable revenue streams. This might lead one to believe that the prices of such stocks fluctuate to a greater degree than a more established, larger company. This would result in a less predictable return profile and hence, greater risk. The aim of this paper is to asses whether small cap stocks have a higher or lower level of volatility than large and mid cap stocks in South Africa. 
 
-Three separate indexes (Large, Mid and Small) were established in order to conduct the analysis over the 2005 to 2022 period. The Global Financial Crisis (GFC) and the COVID-19 pandemic had obvious consequences for the three indexes. The objective was both to determine which of the indexes were most affected by these times of crisis as well as to determine which of the indexes recovered fastest. It is found that the composition and the degree of correlation of an index has profound consequences for the performance of the respective index. As will be divulged, the Small Cap Index generated the lowest level of volatility when compared to the Large Cap and Mid Cap Indexes. The Small Cap Index's returns, standard deviations and degree of correlation all contributed to the resultant observation. The low degree of correlation of the Small Cap Index allowed for it be be well-diversified and best suited to weather an economic crisis in South Africa. 
+Three separate indexes (Large, Mid and Small) were established in order to conduct the analysis over the 2005 to 2022 period. The Global Financial Crisis (GFC) and the COVID-19 pandemic had obvious consequences for the three indexes. The objective was both to determine which of the indexes were most affected by these times of crisis as well as to determine which of the indexes recovered fastest. It is found that the composition and the degree of correlation of an index has profound consequences for the performance of the respective index. As will be divulged, the Small Cap Index generated the lowest level of volatility when compared to the Large Cap and Mid Cap Indexes. The Small Cap Index's returns, standard deviations and degree of correlation all contributed to the resultant observation. The low degree of correlation of the Small Cap Index allowed for it be be well-diversified and thus best suited to weather an economic crisis in South Africa. 
 
 ```{r Drawdowns, include=FALSE}
 daily_contri <- function(x){
@@ -282,7 +282,7 @@ The analysis of volatility is based on three indexes of the Johannesburg Securit
 
 ## Drawdowns
 
-A drawdown chart is used to illustrate the worst periods of time for a portfolio under analysis. The graphs are important for measuring the historical risk of an investment as they display the peak-to-trough decline in each of the indexes value.  A drawdown chart is essentially a measure of downside volatility. 
+A drawdown chart is used to illustrate the worst periods of time for a portfolio under analysis. The graphs are important for measuring the historical risk of an investment as they display the peak-to-trough decline in each of the indexes value [@geboers2022review].  A drawdown chart is essentially a measure of downside volatility. 
 
 The large cap index in Figure\ref{Figure1} experienced its most drastic drawdown between 2008 and 2009 but most drawdowns were in the range of between 0 and -0.2. This is not surprising as the large cap index has a relatively large international exposure and hence, the aftermath of the Global Financial Crisis (GFC) would have been heavy hitting on the returns of the index. The next major drawdown occured in the period during the COVID-19 pandemic. The large cap index is thus highly reactive to times of economic crisis. This is no surprise. 
 
@@ -629,7 +629,7 @@ finplot(full_SD, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T,
 #finplot(join, x.date.dist = "1 year", x.date.type = "%Y", x.vert = T, y.pct = T, y.pct_acc = 1)
 ```
 
-Standard deviation in this analysis is a used as a measure of risk. Returns for each index are annualised so that standard deviation can be compared over different time periods. It is apparent from Figure \ref{Figure9} that between 2005 and 2015 the Large Cap Index is on average epitomised by a larger standard deviation than the Small Cap Index. It should now be of no surprise that the standard deviation of the Large Cap Index spikes, as a result of the GFC, in 2009 more than that of the Small Cap Index. The standard deviation of all indexes spike in 2016 and halfway through 2020. The spike in the Small Cap Index, however, exceeds the standard deviation spikes of both the Large Cap and Mid Cap indexes during these time stamps. Following the 2020 spike, the Small Cap Index quickly reverts back to pre-pandemic levels of standard deviation while the Mid Cap and Large Cap Indexes take a little longer to revert back. By the end of the period of analysis, the standard deviations of the three indexes are reasonably close together with the Small Cap Index having the lowest and the Large Cap Index having the highest. 
+Standard deviation in this analysis is a used as a measure of risk. Returns for each index are annualised so that standard deviation can be compared over different time periods. It is apparent from Figure \ref{Figure9} that between 2005 and 2015 the Large Cap Index is on average epitomised by a larger standard deviation than the Small Cap Index. It should now be of no surprise that the standard deviation of the Large Cap Index spikes, as a result of the GFC, in 2009 more than that of the Small Cap Index. The standard deviation of all indexes spike in 2016 and halfway through 2020. The spike in the Small Cap Index, however, exceeds the standard deviation spikes of both the Large Cap and Mid Cap indexes during these time stamps. Following the 2020 spike, the Small Cap Index quickly reverts back to pre-pandemic levels of standard deviation while the Mid Cap and Large Cap Indexes take a little longer to revert back. By the end of the period of analysis, the standard deviations of the three indexes are reasonably close together with the Small Cap Index having the lowest and the Large Cap Index having the highest standard deviations. 
 
 ```{r sd compare, include=FALSE}
 roll_SD_1 <- function(x,y,z,d){
@@ -749,7 +749,7 @@ annotate_figure(sdplot, top = text_grob("Rolling 12-Month Risk Comparison (past 
                color = "black", face = "bold", size = 11))
 ```
 
-The high potential for upside returns in the Small Cap Index does not necessarily come at a higher portfolio risk. The distribution of materialized risk over time shows that the Small Cap Index delivered lower aggregate volatility on the whole. The stability of the index can be attributed to the lower relative international exposure compared to both the Large and Mid Cap Indexes. 
+The high potential for upside returns in the Small Cap Index does not necessarily come at a higher portfolio risk. As can be seen in Figure \ref{Figure10}, the distribution of materialized risk over time shows that the Small Cap Index delivered lower aggregate volatility on the whole. The stability of the index can be attributed to the lower relative international exposure compared to both the Large and Mid Cap Indexes. 
 
 The Mid Cap Index seems to have delivered the highest aggregate volatility on the whole. This result is likely to have been influenced by the lack of data. Although the Large Cap Index's distribution of materialized risk over time is concentrated between the 2% and 3% regions, its mean standard deviation is roughly equal to the mean standard deviation of the Mid Cap Index. 
 
@@ -931,17 +931,17 @@ annotate_figure(corrplot, top = text_grob("Rolling 12-Month Correlation Comparis
 
 Figure \ref{Figure11} shows the degree to which stocks within each of the Large, Mid and Small Cap indexes are correlated. The correlations are measured on a rolling 12-month basis, with the distributions showing the extent to which correlation varies in each.
 
-Within the Mid and Small Cap Indexes, individual correlations are lower. So, in addition to the high potential upside returns and lower associated risk, the Small Cap Index also provides increased diversification. Although the Mid Cap Index could be regarded as relatively risky, it is more diversified than the Large Cap Index. This associated risk thus has to be derived from somewhere other than correlation between individual stocks within the portfolio. 
+Within the Mid and Small Cap Indexes, individual correlations are lower. So, in addition to the high potential upside returns and lower associated risk, the Small Cap Index also provides increased diversification. Although the Mid Cap Index could be regarded as relatively risky, it is more diversified than the Large Cap Index. This associated risk of the Mid Cap Index thus has to be derived from somewhere other than correlation between individual stocks within the index. 
 
-The Large Cap Index has the highest degree of correlation between its constituent stocks. The Large Cap Index is dominated by stocks that have a high degree of international exposure. Changes in global conditions and economic activity affect these stocks directly and thus leads to a higher level of correlation. A high degree of correlation negatively impacts any chances of diversification. 
+The Large Cap Index has the highest degree of correlation between its constituent stocks. The Large Cap Index is dominated by stocks that have a high degree of international exposure. Changes in global conditions and economic activity affect these stocks directly and thus lead to a higher level of correlation. A high degree of correlation negatively impacts any chances of diversification. 
 
 <!-- hfill can be used to create a space, like here between text and table. -->
 
 # Conclusion \label{Conclusion}
 
-The aim of this paper was to compare the differing levels of volatility in large, mid and small cap stocks. The Small Cap Index was not immune to the consequences of the GFC of 2007/2008 but was not nearly as adversely affected when compared to the Large Cap Index. The high degree of international exposure and hence, high degree of correlation did not allow for the Large Cap Index to be sufficiently diversified  to combat the effects of the GFC. The pandemic of 2020/2021 had a more all-encompassing consequence for stocks as a whole in South Africa. The consequences were not isolated to a few sectors of the economy but rather they adversely impacted most. The lower degree of correlation of both the Small and Mid Cap Indexes assisted these indexes during this time. The composition of the Mid Cap Index did not, however, do the annualised return of the index any favours. The Large Cap Index was better composed and so bounced back better than the Mid Cap Index. 
+The aim of this paper was to compare the differing levels of volatility in large, mid and small cap stocks. The Small Cap Index was not immune to the consequences of the GFC of 2007/2008 but was not nearly as adversely affected when compared to the Large Cap Index. The high degree of international exposure and hence, high degree of correlation did not allow for the Large Cap Index to be sufficiently diversified  to combat the effects of the GFC. The pandemic of 2020/2021 had a more all-encompassing consequence for stocks as a whole in South Africa. The consequences were not isolated to a few sectors of the economy but rather they adversely impacted most sectors. The lower degree of correlation of both the Small and Mid Cap Indexes assisted these indexes during this time. The composition of the Mid Cap Index did not, however, do the annualised return of the index any favours. The Large Cap Index was better composed and so bounced back better than the Mid Cap Index did. 
 
-The Small Cap Index has the greatest potential for upside returns, has the lowest associated risk and has the lowest degree of correlation. The return profile of the index was thus able to be optimised via diversification. It can thus to said with confidence that the Small Cap Index is the most stable in South Africa. 
+The Small Cap Index has the greatest potential for upside returns, has the lowest associated risk and has the lowest degree of correlation. The return profile of the index was thus able to be optimised via diversification. It can therefore be said with confidence that the Small Cap Index is the most stable in South Africa. 
 
 <!-- Make title of bibliography here: -->
 <!-- \newpage -->
@@ -952,12 +952,4 @@ The Small Cap Index has the greatest potential for upside returns, has the lowes
 
 <div id="refs"></div>
 
-
-# Appendix {-}
-
-## Appendix A {-}
-
-Some appendix information here
-
-## Appendix B {-}
 
